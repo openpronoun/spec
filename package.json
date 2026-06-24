@@ -1,0 +1,42 @@
+{
+  "name": "@openpronoun/monorepo",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "packages/*",
+    "docs"
+  ],
+  "packageManager": "npm@11.11.0",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "turbo run build",
+    "dev": "turbo run dev",
+    "test": "turbo run test",
+    "lint": "turbo run lint",
+    "typecheck": "turbo run typecheck",
+    "check:exports": "turbo run check:exports",
+    "docs:dev": "npm run dev --workspace @openpronoun/docs",
+    "docs:build": "turbo run build --filter @openpronoun/docs...",
+    "docs:preview": "npm run preview --workspace @openpronoun/docs",
+    "format": "prettier --write .",
+    "new": "node scripts/new-package.mjs",
+    "changeset": "changeset",
+    "version": "changeset version && npm install --package-lock-only",
+    "release": "turbo run build --filter './packages/*' && changeset publish"
+  },
+  "devDependencies": {
+    "@arethetypeswrong/cli": "latest",
+    "@changesets/cli": "latest",
+    "@eslint/js": "^10.0.1",
+    "eslint": "latest",
+    "prettier": "latest",
+    "publint": "latest",
+    "tsup": "latest",
+    "turbo": "latest",
+    "typescript": "latest",
+    "typescript-eslint": "^8.62.0",
+    "vitest": "latest"
+  }
+}

@@ -1,0 +1,50 @@
+name: Release
+
+on:
+  push:
+    branches: [main]
+
+concurrency: ${{ github.workflow }}-${{ github.ref }}
+
+# OIDC trusted publishing requires id-token: write.
+# contents: write + pull-requests: write are needed by changesets/action
+# to create the "Version Packages" PR and push release tags.
+permissions:
+  contents: write
+  pull-requests: write
+  id-token: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          registry-url: https://registry.npmjs.org
+          cache: npm
+
+      - run: npm ci
+
+      # Build only publishable packages (not docs).
+      - run: npx turbo run build --filter './packages/*'
+
+      - uses: changesets/action@v1
+        with:
+          version: npm run version
+          publish: npm run release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # OIDC trusted publishing — no NPM_TOKEN needed.
+          # Register each @openpronoun/* package as a trusted publisher
+          # on npmjs.com pointing at this repo + this workflow before
+          # the first automated publish.
+          #
+          # Fallback if OIDC not yet configured:
+          # NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          #
+          # Note: The first publish of each new scoped package may need
+          # a one-time manual `npm publish --access public` to create it
+          # on the registry; OIDC takes over afterward.

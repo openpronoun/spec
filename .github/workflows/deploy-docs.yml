@@ -1,0 +1,56 @@
+name: Deploy Docs
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      # Install at repo root — this links all workspaces including docs.
+      # Do NOT use withastro/action: it assumes a standalone project with
+      # a lockfile in the site folder, which breaks workspace linking.
+      - run: npm ci
+
+      # turbo builds packages first (core → react), then docs.
+      - name: Build docs (via turbo)
+        run: npm run docs:build
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs/dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
+
+# Setup checklist:
+# 1. Repo Settings → Pages → Source = "GitHub Actions"
+# 2. Set `site` and `base` in docs/astro.config.mjs to match the
+#    published URL (see §6.3 in the scaffold spec).

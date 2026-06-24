@@ -1,0 +1,38 @@
+{
+  "name": "@openpronoun/docs",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "typecheck": "astro check"
+  },
+  "dependencies": {
+    "@openpronoun/core": "^0.0.0",
+    "@openpronoun/react": "^0.0.0"
+  },
+  "devDependencies": {
+    "@astrojs/alpinejs": "latest",
+    "@astrojs/check": "^0.9.9",
+    "@astrojs/preact": "latest",
+    "@astrojs/react": "latest",
+    "@astrojs/solid-js": "latest",
+    "@astrojs/starlight": "latest",
+    "@astrojs/svelte": "latest",
+    "@astrojs/vue": "latest",
+    "@types/alpinejs": "latest",
+    "@types/react": "latest",
+    "@types/react-dom": "latest",
+    "alpinejs": "latest",
+    "astro": "latest",
+    "preact": "latest",
+    "react": "latest",
+    "react-dom": "latest",
+    "solid-js": "latest",
+    "svelte": "latest",
+    "typescript": "latest",
+    "vue": "latest"
+  }
+}

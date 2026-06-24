@@ -1,0 +1,41 @@
+---
+title: Usage Examples
+description: Multi-framework showcase of the OpenPronoun ecosystem.
+---
+
+import { Tabs, TabItem } from "@astrojs/starlight/components";
+import ReactExample from "../../../components/examples/react/Example.tsx";
+import VueExample from "../../../components/examples/vue/Example.vue";
+import SvelteExample from "../../../components/examples/svelte/Example.svelte";
+import SolidExample from "../../../components/examples/solid/Example.tsx";
+import PreactExample from "../../../components/examples/preact/Example.tsx";
+import AlpineExample from "../../../components/examples/alpine/Example.astro";
+import VanillaExample from "../../../components/examples/vanilla/Example.astro";
+
+> **PLACEHOLDER** — the maintainer replaces these examples with real spec usage.
+> Each tab below renders a live, hydrating island that imports from
+> `@openpronoun/core` (and `@openpronoun/react` for the React tab).
+
+<Tabs>
+  <TabItem label="React">
+    <ReactExample client:visible />
+  </TabItem>
+  <TabItem label="Vue">
+    <VueExample client:visible />
+  </TabItem>
+  <TabItem label="Svelte">
+    <SvelteExample client:visible />
+  </TabItem>
+  <TabItem label="Solid">
+    <SolidExample client:visible />
+  </TabItem>
+  <TabItem label="Preact">
+    <PreactExample client:visible />
+  </TabItem>
+  <TabItem label="Alpine.js">
+    <AlpineExample />
+  </TabItem>
+  <TabItem label="Vanilla JS">
+    <VanillaExample />
+  </TabItem>
+</Tabs>
