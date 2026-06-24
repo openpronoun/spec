@@ -20,6 +20,10 @@ export default defineConfig({
   integrations: [
     starlight({
       title: "OpenPronoun",
+      customCss: [
+        // Relative path to your custom CSS file
+        './src/styles/custom.css',
+      ],
       social: [
         {
           icon: "github",
