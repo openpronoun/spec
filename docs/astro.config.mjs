@@ -7,6 +7,7 @@ import svelte from "@astrojs/svelte";
 import solid from "@astrojs/solid-js";
 import preact from "@astrojs/preact";
 import alpine from "@astrojs/alpinejs";
+import { visit } from "unist-util-visit";
 
 // base is /spec on GitHub Pages, / locally.
 // Set GITHUB_ACTIONS=true (auto-set in CI) to enable the /spec prefix.
@@ -14,10 +15,32 @@ const isCI = env.GITHUB_ACTIONS === "true";
 const SITE = isCI ? "https://openpronoun.github.io" : "http://localhost:4321";
 const BASE = isCI ? "/spec" : "/";
 
+// Rewrites root-relative href="/..." links in Markdown content to include the
+// Astro base path. Astro does not do this automatically for inline MD links.
+function rehypeRebaseLinks() {
+  if (BASE === "/") return () => {};
+  const prefix = BASE.replace(/\/$/, "");
+  return (tree) => {
+    visit(tree, "element", (node) => {
+      if (
+        node.tagName === "a" &&
+        typeof node.properties?.href === "string" &&
+        node.properties.href.startsWith("/") &&
+        !node.properties.href.startsWith("//")
+      ) {
+        node.properties.href = prefix + node.properties.href;
+      }
+    });
+  };
+}
+
 export default defineConfig({
   site: SITE,
   base: BASE,
   output: "static",
+  markdown: {
+    rehypePlugins: [rehypeRebaseLinks],
+  },
   integrations: [
     starlight({
       title: "OpenPronoun",
