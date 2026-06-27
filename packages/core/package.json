@@ -1,6 +1,6 @@
 {
   "name": "@openpronoun/core",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "Reference TypeScript implementation of the OpenPronoun specification — parsing, formatting, and validation.",
   "license": "MIT",
   "type": "module",

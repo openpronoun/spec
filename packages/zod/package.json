@@ -1,6 +1,6 @@
 {
   "name": "@openpronoun/zod",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "Zod schemas and inferred TypeScript types mirroring the OpenPronoun data model (@openpronoun/schema).",
   "license": "MIT",
   "type": "module",
@@ -35,6 +35,7 @@
     "@openpronoun/conformance": "*"
   },
   "publishConfig": {
-    "access": "public"
+    "access": "public",
+    "provenance": true
   }
 }

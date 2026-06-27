@@ -1,6 +1,6 @@
 {
   "name": "@openpronoun/conformance",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "Shared parsing/formatting fixtures for the OpenPronoun specification.",
   "license": "MIT",
   "type": "module",
@@ -17,6 +17,7 @@
     "@openpronoun/schema": "*"
   },
   "publishConfig": {
-    "access": "public"
+    "access": "public",
+    "provenance": true
   }
 }
