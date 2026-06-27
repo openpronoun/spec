@@ -1,3 +1,4 @@
+import { env } from "node:process";
 import { defineConfig } from "astro/config";
 import starlight from "@astrojs/starlight";
 import react from "@astrojs/react";
@@ -7,11 +8,11 @@ import solid from "@astrojs/solid-js";
 import preact from "@astrojs/preact";
 import alpine from "@astrojs/alpinejs";
 
-// TODO(maintainer): set these for your GitHub Pages target.
-// Project page:  site = "https://<owner>.github.io", base = "/<repo>"
-// Custom domain: site = "https://openpronoun.org", base = "/"
-const SITE = "https://openpronoun.github.io";
-const BASE = "/spec";
+// base is /spec on GitHub Pages, / locally.
+// Set GITHUB_ACTIONS=true (auto-set in CI) to enable the /spec prefix.
+const isCI = env.GITHUB_ACTIONS === "true";
+const SITE = isCI ? "https://openpronoun.github.io" : "http://localhost:4321";
+const BASE = isCI ? "/spec" : "/";
 
 export default defineConfig({
   site: SITE,
@@ -20,10 +21,7 @@ export default defineConfig({
   integrations: [
     starlight({
       title: "OpenPronoun",
-      customCss: [
-        // Relative path to your custom CSS file
-        './src/styles/custom.css',
-      ],
+      customCss: ["./src/styles/custom.css"],
       social: [
         {
           icon: "github",
@@ -33,8 +31,20 @@ export default defineConfig({
       ],
       sidebar: [
         {
+          label: "Introduction",
+          items: [{ autogenerate: { directory: "introduction" } }],
+        },
+        {
           label: "Specification",
-          items: [{ autogenerate: { directory: "spec" } }],
+          items: [{ autogenerate: { directory: "specification" } }],
+        },
+        {
+          label: "Guidance",
+          items: [{ autogenerate: { directory: "guidance" } }],
+        },
+        {
+          label: "Project",
+          items: [{ autogenerate: { directory: "project" } }],
         },
         {
           label: "Usage",

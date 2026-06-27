@@ -1,12 +1,12 @@
 ---
 title: OpenPronoun
-description: A specification for representing, exchanging, parsing, and displaying personal pronouns in software systems.
+description: A public, implementation-agnostic technical standard for modeling, parsing, normalizing, and displaying personal pronouns in software.
 template: splash
 hero:
   tagline: A specification for representing, exchanging, parsing, and displaying personal pronouns in software systems.
   actions:
     - text: Read the Spec
-      link: ./spec/overview/
+      link: ./introduction/overview/
       icon: right-arrow
     - text: Usage Examples
       link: ./usage/
@@ -14,5 +14,46 @@ hero:
       icon: rocket
 ---
 
-> **This documentation site is under construction.**
-> The specification and package implementations are owned by the maintainer.
+A public, implementation-agnostic technical standard for modeling, parsing,
+normalizing, and displaying personal pronouns in software.
+
+**Status:** Draft · **Version:** 0.1
+
+The specification is published under a permissive license. The reference
+implementations (a TypeScript library and a React component library) are MIT
+licensed.
+
+## What this standard covers
+
+- A structured **[data model](/specification/data-model/)** for pronoun sets and
+  pronoun preferences.
+- **[Parsing and normalization rules](/specification/parsing/)** for turning
+  varied user input into that model.
+- **[Display and canonical stringification](/specification/display/)**
+  conventions.
+- **[UX and accessibility guidelines](/guidance/ux-accessibility/)** for
+  collecting and showing pronouns.
+- Considerations for **[internationalization](/guidance/internationalization/)**
+  and **extensibility**.
+- A **[conformance](/specification/conformance/)** definition using RFC 2119
+  keywords, backed by a published JSON Schema and a shared test suite.
+
+## How the spec is organized
+
+- **Introduction** — non-normative background and motivation.
+- **Specification** — the normative core: conformance, data model, parsing,
+  display.
+- **Guidance** — recommended practices: UX/accessibility, internationalization,
+  security/privacy.
+- **Project** — reference implementations, references, and changelog.
+
+## Compliance badge
+
+Organizations that conform to the standard may display a compliance badge (a la
+[Shields.io](https://shields.io)), e.g.
+
+```md
+![Pronoun Standard Compliant](https://img.shields.io/badge/pronouns-standard%20compliant-blueviolet)
+```
+
+See [Conformance](/specification/conformance/) for what compliance requires.

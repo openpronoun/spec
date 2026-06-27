@@ -1,0 +1,718 @@
+{
+  "kind": "parsing",
+  "description": "Each case maps an input string to the expected normalized PronounPreference output. Inputs are drawn from or modeled on real-world submissions. An expected value of null means 'no preference' (the field is absent), which is distinct from the special 'none' preference.",
+  "cases": [
+    {
+      "category": "single-set",
+      "name": "single set, capitalized input",
+      "input": "She/Her",
+      "expected": [
+        {
+          "subjective": "she",
+          "objective": "her",
+          "possessive_adjective": "her",
+          "possessive_pronoun": "hers",
+          "reflexive": "herself"
+        }
+      ]
+    },
+    {
+      "category": "single-set",
+      "name": "single set, lowercase",
+      "input": "he/him/his",
+      "expected": [
+        {
+          "subjective": "he",
+          "objective": "him",
+          "possessive_adjective": "his",
+          "possessive_pronoun": "his",
+          "reflexive": "himself"
+        }
+      ]
+    },
+    {
+      "category": "single-set",
+      "name": "partial set filled from dictionary",
+      "input": "they",
+      "expected": [
+        {
+          "subjective": "they",
+          "objective": "them",
+          "possessive_adjective": "their",
+          "possessive_pronoun": "theirs",
+          "reflexive": "themselves"
+        }
+      ]
+    },
+    {
+      "category": "single-set",
+      "name": "neopronoun set in dictionary",
+      "input": "Xe/Xem",
+      "expected": [
+        {
+          "subjective": "xe",
+          "objective": "xem",
+          "possessive_adjective": "xyr",
+          "possessive_pronoun": "xyrs",
+          "reflexive": "xemself"
+        }
+      ]
+    },
+    {
+      "category": "multi-set-comma",
+      "name": "two sets, comma-separated",
+      "input": "she/her/hers, he/him/his",
+      "expected": [
+        {
+          "subjective": "she",
+          "objective": "her",
+          "possessive_adjective": "her",
+          "possessive_pronoun": "hers",
+          "reflexive": "herself"
+        },
+        {
+          "subjective": "he",
+          "objective": "him",
+          "possessive_adjective": "his",
+          "possessive_pronoun": "his",
+          "reflexive": "himself"
+        }
+      ]
+    },
+    {
+      "category": "multi-set-comma",
+      "name": "three sets, comma-separated (most common real shape)",
+      "input": "they/them/theirs, he/him/his, she/her/hers",
+      "expected": [
+        {
+          "subjective": "they",
+          "objective": "them",
+          "possessive_adjective": "their",
+          "possessive_pronoun": "theirs",
+          "reflexive": "themselves"
+        },
+        {
+          "subjective": "he",
+          "objective": "him",
+          "possessive_adjective": "his",
+          "possessive_pronoun": "his",
+          "reflexive": "himself"
+        },
+        {
+          "subjective": "she",
+          "objective": "her",
+          "possessive_adjective": "her",
+          "possessive_pronoun": "hers",
+          "reflexive": "herself"
+        }
+      ]
+    },
+    {
+      "category": "multi-set-and",
+      "name": "two sets separated by 'and'",
+      "input": "he/him and they/them",
+      "expected": [
+        {
+          "subjective": "he",
+          "objective": "him",
+          "possessive_adjective": "his",
+          "possessive_pronoun": "his",
+          "reflexive": "himself"
+        },
+        {
+          "subjective": "they",
+          "objective": "them",
+          "possessive_adjective": "their",
+          "possessive_pronoun": "theirs",
+          "reflexive": "themselves"
+        }
+      ]
+    },
+    {
+      "category": "multi-set-ampersand",
+      "name": "two sets separated by '&'",
+      "input": "he/him/his & she/her/hers",
+      "expected": [
+        {
+          "subjective": "he",
+          "objective": "him",
+          "possessive_adjective": "his",
+          "possessive_pronoun": "his",
+          "reflexive": "himself"
+        },
+        {
+          "subjective": "she",
+          "objective": "her",
+          "possessive_adjective": "her",
+          "possessive_pronoun": "hers",
+          "reflexive": "herself"
+        }
+      ]
+    },
+    {
+      "category": "multi-set-or",
+      "name": "two sets separated by 'or'",
+      "input": "she/her or he/him",
+      "expected": [
+        {
+          "subjective": "she",
+          "objective": "her",
+          "possessive_adjective": "her",
+          "possessive_pronoun": "hers",
+          "reflexive": "herself"
+        },
+        {
+          "subjective": "he",
+          "objective": "him",
+          "possessive_adjective": "his",
+          "possessive_pronoun": "his",
+          "reflexive": "himself"
+        }
+      ]
+    },
+    {
+      "category": "multi-set-or",
+      "name": "bare subjectives joined by 'or'",
+      "input": "he or they",
+      "expected": [
+        {
+          "subjective": "he",
+          "objective": "him",
+          "possessive_adjective": "his",
+          "possessive_pronoun": "his",
+          "reflexive": "himself"
+        },
+        {
+          "subjective": "they",
+          "objective": "them",
+          "possessive_adjective": "their",
+          "possessive_pronoun": "theirs",
+          "reflexive": "themselves"
+        }
+      ]
+    },
+    {
+      "category": "multi-set-space",
+      "name": "two sets separated by whitespace only",
+      "input": "he she",
+      "expected": [
+        {
+          "subjective": "he",
+          "objective": "him",
+          "possessive_adjective": "his",
+          "possessive_pronoun": "his",
+          "reflexive": "himself"
+        },
+        {
+          "subjective": "she",
+          "objective": "her",
+          "possessive_adjective": "her",
+          "possessive_pronoun": "hers",
+          "reflexive": "herself"
+        }
+      ]
+    },
+    {
+      "category": "multi-set-space",
+      "name": "two slash-sets separated by whitespace",
+      "input": "she/her they/them",
+      "expected": [
+        {
+          "subjective": "she",
+          "objective": "her",
+          "possessive_adjective": "her",
+          "possessive_pronoun": "hers",
+          "reflexive": "herself"
+        },
+        {
+          "subjective": "they",
+          "objective": "them",
+          "possessive_adjective": "their",
+          "possessive_pronoun": "theirs",
+          "reflexive": "themselves"
+        }
+      ]
+    },
+    {
+      "category": "concatenation-split",
+      "name": "two sets jammed with slashes",
+      "input": "they/them/he/him",
+      "expected": [
+        {
+          "subjective": "they",
+          "objective": "them",
+          "possessive_adjective": "their",
+          "possessive_pronoun": "theirs",
+          "reflexive": "themselves"
+        },
+        {
+          "subjective": "he",
+          "objective": "him",
+          "possessive_adjective": "his",
+          "possessive_pronoun": "his",
+          "reflexive": "himself"
+        }
+      ]
+    },
+    {
+      "category": "concatenation-split",
+      "name": "three bare subjectives via slashes",
+      "input": "he/she/they",
+      "expected": [
+        {
+          "subjective": "he",
+          "objective": "him",
+          "possessive_adjective": "his",
+          "possessive_pronoun": "his",
+          "reflexive": "himself"
+        },
+        {
+          "subjective": "she",
+          "objective": "her",
+          "possessive_adjective": "her",
+          "possessive_pronoun": "hers",
+          "reflexive": "herself"
+        },
+        {
+          "subjective": "they",
+          "objective": "them",
+          "possessive_adjective": "their",
+          "possessive_pronoun": "theirs",
+          "reflexive": "themselves"
+        }
+      ]
+    },
+    {
+      "category": "separator-backslash",
+      "name": "backslash used like slash",
+      "input": "they\\them",
+      "expected": [
+        {
+          "subjective": "they",
+          "objective": "them",
+          "possessive_adjective": "their",
+          "possessive_pronoun": "theirs",
+          "reflexive": "themselves"
+        }
+      ]
+    },
+    {
+      "category": "whitespace-in-separator",
+      "name": "spaces around slashes",
+      "input": "they/ them/ theirs",
+      "expected": [
+        {
+          "subjective": "they",
+          "objective": "them",
+          "possessive_adjective": "their",
+          "possessive_pronoun": "theirs",
+          "reflexive": "themselves"
+        }
+      ]
+    },
+    {
+      "category": "whitespace-in-separator",
+      "name": "spaced shorthand",
+      "input": "she / they",
+      "expected": [
+        {
+          "subjective": "she",
+          "objective": "her",
+          "possessive_adjective": "her",
+          "possessive_pronoun": "hers",
+          "reflexive": "herself"
+        },
+        {
+          "subjective": "they",
+          "objective": "them",
+          "possessive_adjective": "their",
+          "possessive_pronoun": "theirs",
+          "reflexive": "themselves"
+        }
+      ]
+    },
+    {
+      "category": "leading-empty-element",
+      "name": "leading comma yields one set",
+      "input": ", He/him",
+      "expected": [
+        {
+          "subjective": "he",
+          "objective": "him",
+          "possessive_adjective": "his",
+          "possessive_pronoun": "his",
+          "reflexive": "himself"
+        }
+      ]
+    },
+    {
+      "category": "leading-empty-element",
+      "name": "leading comma with concatenated sets",
+      "input": ", He/She/They",
+      "expected": [
+        {
+          "subjective": "he",
+          "objective": "him",
+          "possessive_adjective": "his",
+          "possessive_pronoun": "his",
+          "reflexive": "himself"
+        },
+        {
+          "subjective": "she",
+          "objective": "her",
+          "possessive_adjective": "her",
+          "possessive_pronoun": "hers",
+          "reflexive": "herself"
+        },
+        {
+          "subjective": "they",
+          "objective": "them",
+          "possessive_adjective": "their",
+          "possessive_pronoun": "theirs",
+          "reflexive": "themselves"
+        }
+      ]
+    },
+    {
+      "category": "context-parenthetical",
+      "name": "context captured from parentheses",
+      "input": "she/her (only in professional settings)",
+      "expected": [
+        {
+          "subjective": "she",
+          "objective": "her",
+          "possessive_adjective": "her",
+          "possessive_pronoun": "hers",
+          "reflexive": "herself",
+          "context": "only in professional settings"
+        }
+      ]
+    },
+    {
+      "category": "special-any",
+      "name": "special: any keyword",
+      "input": "Any pronoun",
+      "expected": [
+        {
+          "type": "any"
+        }
+      ]
+    },
+    {
+      "category": "special-any",
+      "name": "special: any via any/all",
+      "input": "any/all",
+      "expected": [
+        {
+          "type": "any"
+        }
+      ]
+    },
+    {
+      "category": "special-any",
+      "name": "special: any via phrase",
+      "input": "whatever you feel comfortable",
+      "expected": [
+        {
+          "type": "any"
+        }
+      ]
+    },
+    {
+      "category": "special-any",
+      "name": "special: any via 'i go by all'",
+      "input": "i go by all",
+      "expected": [
+        {
+          "type": "any"
+        }
+      ]
+    },
+    {
+      "category": "special-any",
+      "name": "special: any with filler",
+      "input": "any and all pronouns",
+      "expected": [
+        {
+          "type": "any"
+        }
+      ]
+    },
+    {
+      "category": "special-none",
+      "name": "special: none via 'no pronouns'",
+      "input": "no pronouns",
+      "expected": [
+        {
+          "type": "none"
+        }
+      ]
+    },
+    {
+      "category": "special-none",
+      "name": "special: none with use-name note",
+      "input": "none, refer to me by name",
+      "expected": [
+        {
+          "type": "none"
+        }
+      ]
+    },
+    {
+      "category": "special-none",
+      "name": "special: none via 'use my name'",
+      "input": "use my name",
+      "expected": [
+        {
+          "type": "none"
+        }
+      ]
+    },
+    {
+      "category": "special-ask",
+      "name": "special: ask",
+      "input": "ask me",
+      "expected": [
+        {
+          "type": "ask"
+        }
+      ]
+    },
+    {
+      "category": "special-unspecified",
+      "name": "special: unspecified via 'unsure'",
+      "input": "unsure",
+      "expected": [
+        {
+          "type": "unspecified"
+        }
+      ]
+    },
+    {
+      "category": "special-unspecified",
+      "name": "special: unspecified via decline",
+      "input": "prefer not to disclose",
+      "expected": [
+        {
+          "type": "unspecified"
+        }
+      ]
+    },
+    {
+      "category": "special-unspecified",
+      "name": "special: unspecified via 'not sure yet'",
+      "input": "not sure yet",
+      "expected": [
+        {
+          "type": "unspecified"
+        }
+      ]
+    },
+    {
+      "category": "form-recovery",
+      "name": "objective forms recovered to two sets",
+      "input": "him/her",
+      "expected": [
+        {
+          "subjective": "he",
+          "objective": "him",
+          "possessive_adjective": "his",
+          "possessive_pronoun": "his",
+          "reflexive": "himself"
+        },
+        {
+          "subjective": "she",
+          "objective": "her",
+          "possessive_adjective": "her",
+          "possessive_pronoun": "hers",
+          "reflexive": "herself"
+        }
+      ]
+    },
+    {
+      "category": "form-recovery",
+      "name": "duplicate set collapsed",
+      "input": "her/she",
+      "expected": [
+        {
+          "subjective": "she",
+          "objective": "her",
+          "possessive_adjective": "her",
+          "possessive_pronoun": "hers",
+          "reflexive": "herself"
+        }
+      ]
+    },
+    {
+      "category": "form-recovery",
+      "name": "scrambled comma-separated forms",
+      "input": "she,her,he,him",
+      "expected": [
+        {
+          "subjective": "she",
+          "objective": "her",
+          "possessive_adjective": "her",
+          "possessive_pronoun": "hers",
+          "reflexive": "herself"
+        },
+        {
+          "subjective": "he",
+          "objective": "him",
+          "possessive_adjective": "his",
+          "possessive_pronoun": "his",
+          "reflexive": "himself"
+        }
+      ]
+    },
+    {
+      "category": "filler-stripping",
+      "name": "trailing 'is fine' filler stripped",
+      "input": "he/him is fine",
+      "expected": [
+        {
+          "subjective": "he",
+          "objective": "him",
+          "possessive_adjective": "his",
+          "possessive_pronoun": "his",
+          "reflexive": "himself"
+        }
+      ]
+    },
+    {
+      "category": "filler-stripping",
+      "name": "set plus 'also' filler across comma",
+      "input": "she/her/hers, he/him/his also",
+      "expected": [
+        {
+          "subjective": "she",
+          "objective": "her",
+          "possessive_adjective": "her",
+          "possessive_pronoun": "hers",
+          "reflexive": "herself"
+        },
+        {
+          "subjective": "he",
+          "objective": "him",
+          "possessive_adjective": "his",
+          "possessive_pronoun": "his",
+          "reflexive": "himself"
+        }
+      ]
+    },
+    {
+      "category": "filler-stripping",
+      "name": "'Any is fine' resolves to any",
+      "input": "Any is fine",
+      "expected": [
+        {
+          "type": "any"
+        }
+      ]
+    },
+    {
+      "category": "exclusion",
+      "name": "positive sets plus excluded set",
+      "input": "he/him or she/her, just not they/them",
+      "expected": [
+        {
+          "subjective": "he",
+          "objective": "him",
+          "possessive_adjective": "his",
+          "possessive_pronoun": "his",
+          "reflexive": "himself"
+        },
+        {
+          "subjective": "she",
+          "objective": "her",
+          "possessive_adjective": "her",
+          "possessive_pronoun": "hers",
+          "reflexive": "herself"
+        },
+        {
+          "subjective": "they",
+          "objective": "them",
+          "possessive_adjective": "their",
+          "possessive_pronoun": "theirs",
+          "reflexive": "themselves",
+          "exclude": true
+        }
+      ]
+    },
+    {
+      "category": "placeholder",
+      "name": "placeholder-only input yields no preference",
+      "input": "N/A",
+      "expected": null
+    },
+    {
+      "category": "valid-plus-garbage",
+      "name": "recognized set plus unrecognized token",
+      "input": "they/them/theirs, Reading",
+      "expected": [
+        {
+          "subjective": "they",
+          "objective": "them",
+          "possessive_adjective": "their",
+          "possessive_pronoun": "theirs",
+          "reflexive": "themselves"
+        },
+        {
+          "type": "custom",
+          "display": "Reading"
+        }
+      ]
+    },
+    {
+      "category": "valid-plus-garbage",
+      "name": "recognized set plus numeric noise",
+      "input": "she/her/hers, 12345",
+      "expected": [
+        {
+          "subjective": "she",
+          "objective": "her",
+          "possessive_adjective": "her",
+          "possessive_pronoun": "hers",
+          "reflexive": "herself"
+        },
+        {
+          "type": "custom",
+          "display": "12345"
+        }
+      ]
+    },
+    {
+      "category": "unrecognized-custom",
+      "name": "unknown noun-self set preserved as custom",
+      "input": "fox/foxs",
+      "expected": [
+        {
+          "type": "custom",
+          "display": "fox/foxs"
+        }
+      ]
+    },
+    {
+      "category": "unrecognized-custom",
+      "name": "non-pronoun text preserved as custom",
+      "input": "david",
+      "expected": [
+        {
+          "type": "custom",
+          "display": "david"
+        }
+      ]
+    },
+    {
+      "category": "empty",
+      "name": "empty input yields no preference",
+      "input": "",
+      "expected": null
+    },
+    {
+      "category": "empty",
+      "name": "whitespace-only input yields no preference",
+      "input": "   ",
+      "expected": null
+    }
+  ]
+}

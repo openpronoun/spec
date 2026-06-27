@@ -1,27 +1,58 @@
 ---
-/**
- * PLACEHOLDER — example content owned by the maintainer.
- * This proves vanilla JS / Web Components work without any framework integration.
- */
-import { placeholder } from "@openpronoun/core";
+import { parse, format } from "@openpronoun/core";
 
-const value = placeholder();
+// Server-side: pre-render several examples.
+const examples = [
+  "she/her, they/them",
+  "any pronouns",
+  "xe/xem",
+  "he/him or she/her, just not they/them",
+];
+
+const rows = examples.map((input) => {
+  const parsed = parse(input);
+  return {
+    input,
+    short: parsed ? format(parsed) : "(null)",
+    expanded: parsed ? format(parsed, { form: "expanded" }) : "(null)",
+    count: parsed?.length ?? 0,
+  };
+});
 ---
 
 <div
-  id="vanilla-example"
-  style="padding: 1rem; border: 1px solid #444; border-radius: 8px"
+  style="padding: 1rem; border: 1px solid #e2e8f0; border-radius: 8px; font-family: system-ui, sans-serif"
 >
-  <p><strong>Vanilla JS</strong> — via <code>@openpronoun/core</code>:</p>
-  <p>
-    Result: <code id="vanilla-result">{value}</code>
+  <p style="margin: 0 0 12px; font-weight: 600">
+    Vanilla JS — <code>@openpronoun/core</code> (SSR)
+  </p>
+  <table style="border-collapse: collapse; font-size: 13px; width: 100%">
+    <thead>
+      <tr>
+        <th style="border-bottom: 1px solid #e2e8f0; padding: 4px 8px; text-align: left; color: #718096; font-weight: 600">Input</th>
+        <th style="border-bottom: 1px solid #e2e8f0; padding: 4px 8px; text-align: left; color: #718096; font-weight: 600">Short</th>
+        <th style="border-bottom: 1px solid #e2e8f0; padding: 4px 8px; text-align: left; color: #718096; font-weight: 600">Expanded</th>
+        <th style="border-bottom: 1px solid #e2e8f0; padding: 4px 8px; text-align: right; color: #718096; font-weight: 600">#</th>
+      </tr>
+    </thead>
+    <tbody>
+      {rows.map((r) => (
+        <tr>
+          <td style="padding: 6px 8px; border-bottom: 1px solid #f0f0f0">
+            <code style="font-size: 11px">{r.input}</code>
+          </td>
+          <td style="padding: 6px 8px; border-bottom: 1px solid #f0f0f0">
+            <strong>{r.short}</strong>
+          </td>
+          <td style="padding: 6px 8px; border-bottom: 1px solid #f0f0f0">{r.expanded}</td>
+          <td style="padding: 6px 8px; border-bottom: 1px solid #f0f0f0; text-align: right; color: #718096">{r.count}</td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+  <p style="color: #a0aec0; font-size: 11px; margin: 10px 0 0">
+    Rendered at build time — no JS bundle required. For interactive demos in
+    plain JS, parse on the server and stream the result, or use one of the
+    framework integrations above.
   </p>
 </div>
-
-<script>
-  // Client-side hydration proof: updates the result after load.
-  const el = document.getElementById("vanilla-result");
-  if (el) {
-    el.textContent = el.textContent + " ✓";
-  }
-</script>

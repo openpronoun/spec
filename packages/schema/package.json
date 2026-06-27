@@ -1,0 +1,18 @@
+{
+  "name": "@openpronoun/schema",
+  "version": "0.0.0",
+  "description": "Canonical JSON Schema for the OpenPronoun data model (PronounPreference / PronounSet).",
+  "license": "MIT",
+  "type": "module",
+  "files": [
+    "pronoun-set.schema.json",
+    "README.md"
+  ],
+  "exports": {
+    ".": "./pronoun-set.schema.json",
+    "./pronoun-set.schema.json": "./pronoun-set.schema.json"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

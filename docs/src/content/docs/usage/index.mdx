@@ -1,9 +1,9 @@
 ---
 title: Usage Examples
-description: Multi-framework showcase of the OpenPronoun ecosystem.
+description: How to use @openpronoun/core — parse, format, validate, and filter pronoun preferences.
 ---
 
-import { Tabs, TabItem } from "@astrojs/starlight/components";
+import { Tabs, TabItem, Code } from "@astrojs/starlight/components";
 import ReactExample from "../../../components/examples/react/Example.tsx";
 import VueExample from "../../../components/examples/vue/Example.vue";
 import SvelteExample from "../../../components/examples/svelte/Example.svelte";
@@ -12,12 +12,344 @@ import PreactExample from "../../../components/examples/preact/Example.tsx";
 import AlpineExample from "../../../components/examples/alpine/Example.astro";
 import VanillaExample from "../../../components/examples/vanilla/Example.astro";
 
-> **PLACEHOLDER** — the maintainer replaces these examples with real spec usage.
-> Each tab below renders a live, hydrating island that imports from
-> `@openpronoun/core` (and `@openpronoun/react` for the React tab).
+## `@openpronoun/core` API
+
+Install the package:
+
+```sh
+npm install @openpronoun/core
+```
+
+### `parse(input)`
+
+Converts free-text input into a structured `PronounPreference`. Returns `null`
+for empty, whitespace-only, placeholder (`N/A`, `TBD`, `-`), or null input.
+
+```ts
+import { parse } from "@openpronoun/core";
+
+parse("she/her");
+// [{ subjective: "she", objective: "her", possessive_adjective: "her",
+//    possessive_pronoun: "hers", reflexive: "herself" }]
+
+parse("they/them, she/her");
+// [{ subjective: "they", ... }, { subjective: "she", ... }]
+
+parse("they/them/he/him");
+// two sets — concatenation split:
+// [{ subjective: "they", ... }, { subjective: "he", ... }]
+
+parse("any pronouns");
+// [{ type: "any" }]
+
+parse("no pronouns");
+// [{ type: "none" }]
+
+parse("ask me");
+// [{ type: "ask" }]
+
+parse("prefer not to disclose");
+// [{ type: "unspecified" }]
+
+parse("she/her (professional contexts only)");
+// [{ subjective: "she", ..., context: "professional contexts only" }]
+
+parse("he/him or she/her, just not they/them");
+// [{ subjective: "he", ... },
+//  { subjective: "she", ... },
+//  { subjective: "they", ..., exclude: true }]
+
+parse("fox/foxs");
+// [{ type: "custom", display: "fox/foxs" }]
+
+parse("N/A");
+// null
+
+parse(null);
+// null
+```
+
+### `format(preference, options?)`
+
+Converts a `PronounPreference` back into a display string.
+
+```ts
+import { parse, format } from "@openpronoun/core";
+
+const pref = parse("she/her, they/them")!;
+
+format(pref);
+// "She/Her, They/Them"
+
+format(pref, { form: "expanded" });
+// "She/Her/Hers, They/Them/Theirs"
+
+// Ranking: lower number = higher priority
+const ranked = parse("she/her, they/them")!.map((e, i) => ({
+  ...e,
+  ranking: i === 0 ? 2 : 1,
+}));
+format(ranked);
+// "They/Them, She/Her"
+
+// Context is rendered in parentheses
+format(parse("he/him (at work), they/them")!);
+// "He/Him (at work), They/Them"
+
+// Excluded sets are omitted from short display
+format(parse("she/her, not they/them")!);
+// "She/Her"
+
+// Excluded sets surfaced in detailed display
+format(parse("she/her, not they/them")!, { form: "detailed" });
+// "She/Her (not They/Them)"
+
+// Special types
+format([{ type: "any" }]);             // "Any pronouns"
+format([{ type: "none" }]);            // "No pronouns (use name)"
+format([{ type: "ask" }]);             // "Ask me my pronouns"
+format([{ type: "unspecified" }]);     // "Unspecified"
+
+// Custom entries are displayed as entered (with capitalization)
+format([{ type: "custom", display: "fae/faer" }]);
+// "Fae/Faer"
+```
+
+### `format` with privacy filtering
+
+Entries with `privacy` level `1` or higher are hidden when `audience` is
+`"public"`.
+
+```ts
+import { format } from "@openpronoun/core";
+
+const pref = [
+  { subjective: "she", objective: "her",
+    possessive_adjective: "her", possessive_pronoun: "hers", reflexive: "herself",
+    privacy: 0 },
+  { subjective: "they", objective: "them",
+    possessive_adjective: "their", possessive_pronoun: "theirs", reflexive: "themselves",
+    privacy: 1 },
+];
+
+format(pref);                          // "She/Her, They/Them"
+format(pref, { audience: "public" });  // "She/Her"
+```
+
+### `validate`, `validateOrThrow`, `validationErrors`
+
+```ts
+import { validate, validateOrThrow, validationErrors } from "@openpronoun/core";
+
+validate([{ subjective: "she", objective: "her",
+            possessive_adjective: "her", possessive_pronoun: "hers",
+            reflexive: "herself" }]);
+// true
+
+validate("she/her");
+// false — raw strings are not a PronounPreference
+
+validationErrors([{ subjective: "she" }]);
+// ["objective: Required", "possessive_adjective: Required", ...]
+
+validateOrThrow([{ type: "any" }]);
+// [{ type: "any" }] — returns the value if valid, throws ZodError if not
+```
+
+### `filterByAudience`
+
+Strips entries the current audience is not allowed to see, based on the `privacy`
+field.
+
+```ts
+import { filterByAudience } from "@openpronoun/core";
+
+const pref = [
+  { subjective: "she", objective: "her",
+    possessive_adjective: "her", possessive_pronoun: "hers",
+    reflexive: "herself" },
+  { subjective: "they", objective: "them",
+    possessive_adjective: "their", possessive_pronoun: "theirs",
+    reflexive: "themselves", privacy: 1 },
+];
+
+filterByAudience(pref, "public");
+// [{ subjective: "she", ... }]  — they/them entry removed
+
+filterByAudience(pref, "internal");
+// both entries returned — only "public" triggers filtering
+```
+
+### Constants
+
+```ts
+import {
+  PRONOUN_DICTIONARY,
+  FORM_TO_SET,
+  SPECIAL_KEYWORDS,
+  PLACEHOLDER_STRINGS,
+  FILLER_PATTERNS,
+} from "@openpronoun/core";
+
+// All built-in English sets
+PRONOUN_DICTIONARY.map((e) => `${e.subjective}/${e.objective}`);
+// ["she/her", "he/him", "they/them", "it/it", "xe/xem", "ze/zir", ...]
+
+// Reverse lookup: any form → its canonical set
+FORM_TO_SET.get("him");
+// { subjective: "he", objective: "him", ... }
+
+FORM_TO_SET.get("theirs");
+// { subjective: "they", objective: "them", ... }
+
+// All recognized special-keyword phrases
+SPECIAL_KEYWORDS.any;
+// ["any", "any pronouns", "any/all", "all", "idc", ...]
+
+SPECIAL_KEYWORDS.none;
+// ["none", "no pronouns", "use my name", ...]
+```
+
+### TypeScript types
+
+```ts
+import type {
+  PronounPreference,
+  PronounEntry,
+  PronounSet,
+  SpecialPreference,
+  CustomEntry,
+  FormatOptions,
+  CanonicalEntry,
+} from "@openpronoun/core";
+
+// PronounPreference is PronounEntry[]
+const pref: PronounPreference = [
+  {
+    subjective: "they",
+    objective: "them",
+    possessive_adjective: "their",
+    possessive_pronoun: "theirs",
+    reflexive: "themselves",
+  },
+];
+
+// FormatOptions
+const opts: FormatOptions = { form: "expanded", audience: "public" };
+```
+
+---
+
+## `@openpronoun/react` components
+
+The React package builds on `@openpronoun/core` and provides ready-made,
+accessible components and hooks for collecting and displaying pronouns.
+
+```sh
+npm install @openpronoun/react
+```
+
+### Components at a glance
+
+| Component | Purpose |
+|-----------|---------|
+| `<PronounDisplay>` | Read-only display of one or more entries (text or badge mode) |
+| `<PronounBadge>` | Single-entry pill badge, optionally removable |
+| `<PronounSelector>` | Multi-select picker with drag-to-reorder and custom pronoun editor |
+| `<PronounForm>` | All-in-one field: label + selector + helper text + preview |
+| `<PronounDetailEditor>` | Form for entering all five pronoun forms manually |
+| `<OriginalTextBadge>` | Shows the original freetext alongside structured output |
+
+### Hooks
+
+| Hook | Purpose |
+|------|---------|
+| `usePronounState` | Manages a `PronounEntry[]` list with add/remove/reorder |
+| `usePronounParser` | Debounced live parsing of freetext into entries |
+
+### Quick start
+
+```tsx
+import { PronounForm } from "@openpronoun/react";
+
+function ProfileForm() {
+  const [pronouns, setPronouns] = useState([]);
+  return (
+    <PronounForm
+      label="Pronouns"
+      helperText="Sharing is optional — we use this to address you correctly."
+      value={pronouns}
+      onChange={setPronouns}
+      showPreview
+    />
+  );
+}
+```
+
+### Display only
+
+```tsx
+import { PronounDisplay } from "@openpronoun/react";
+
+// Short: "She/Her, They/Them"
+<PronounDisplay pronouns={user.pronouns} />
+
+// Expanded: "She/Her/Hers"
+<PronounDisplay format="long" pronouns={user.pronouns} />
+
+// Badge pills
+<PronounDisplay displayMode="badges" pronouns={user.pronouns} />
+
+// Hides entries with privacy ≥ 1 (default: publicOnly=true)
+<PronounDisplay publicOnly pronouns={user.pronouns} />
+```
+
+### Theming and customization
+
+Pass a partial `theme` object to override colors, fonts, border-radius, and
+spacing. Built-in presets: `defaultTheme`, `darkTheme`, `plumecareTheme`,
+`memberDashboardTheme`.
+
+```tsx
+import { PronounSelector, darkTheme } from "@openpronoun/react";
+
+<PronounSelector
+  value={pronouns}
+  onChange={setPronouns}
+  theme={darkTheme}
+/>
+
+// Or supply a partial override (deep-merged with defaultTheme):
+<PronounSelector
+  value={pronouns}
+  onChange={setPronouns}
+  theme={{ colors: { primary: "#7c3aed" } }}
+/>
+```
+
+Every component also accepts a `classNames` prop for granular CSS class
+injection on individual sub-elements:
+
+```tsx
+<PronounSelector
+  classNames={{
+    root: "my-selector",
+    tag: { container: "my-tag", label: "my-tag-label" },
+    option: { groupLabel: "my-group" },
+  }}
+  value={pronouns}
+  onChange={setPronouns}
+/>
+```
+
+---
+
+## Live examples
 
 <Tabs>
   <TabItem label="React">
+    React tab uses `@openpronoun/react` — click through **Display**, **Selection**, **Form**, **Parser**, and **Themes** to explore the full component library.
+
     <ReactExample client:visible />
   </TabItem>
   <TabItem label="Vue">

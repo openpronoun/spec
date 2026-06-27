@@ -1,0 +1,275 @@
+{
+  "kind": "formatting",
+  "description": "Each case maps a PronounPreference plus display options to the expected display string. The 'form' option is one of: short, expanded.",
+  "cases": [
+    {
+      "name": "single set, short",
+      "input": [
+        {
+          "subjective": "she",
+          "objective": "her",
+          "possessive_adjective": "her",
+          "possessive_pronoun": "hers",
+          "reflexive": "herself"
+        }
+      ],
+      "options": {
+        "form": "short"
+      },
+      "expected": "She/Her"
+    },
+    {
+      "name": "single set, expanded",
+      "input": [
+        {
+          "subjective": "she",
+          "objective": "her",
+          "possessive_adjective": "her",
+          "possessive_pronoun": "hers",
+          "reflexive": "herself"
+        }
+      ],
+      "options": {
+        "form": "expanded"
+      },
+      "expected": "She/Her/Hers"
+    },
+    {
+      "name": "they/them expanded keeps theirs",
+      "input": [
+        {
+          "subjective": "they",
+          "objective": "them",
+          "possessive_adjective": "their",
+          "possessive_pronoun": "theirs",
+          "reflexive": "themselves"
+        }
+      ],
+      "options": {
+        "form": "expanded"
+      },
+      "expected": "They/Them/Theirs"
+    },
+    {
+      "name": "multiple sets, short, comma-separated",
+      "input": [
+        {
+          "subjective": "she",
+          "objective": "her",
+          "possessive_adjective": "her",
+          "possessive_pronoun": "hers",
+          "reflexive": "herself"
+        },
+        {
+          "subjective": "they",
+          "objective": "them",
+          "possessive_adjective": "their",
+          "possessive_pronoun": "theirs",
+          "reflexive": "themselves"
+        }
+      ],
+      "options": {
+        "form": "short"
+      },
+      "expected": "She/Her, They/Them"
+    },
+    {
+      "name": "ranking determines order",
+      "input": [
+        {
+          "subjective": "she",
+          "objective": "her",
+          "possessive_adjective": "her",
+          "possessive_pronoun": "hers",
+          "reflexive": "herself",
+          "ranking": 2
+        },
+        {
+          "sub": "they",
+          "obj": "them",
+          "p_a": "their",
+          "p_pn": "theirs",
+          "ref": "themselves",
+          "rnk": 1
+        }
+      ],
+      "options": {
+        "form": "short"
+      },
+      "expected": "They/Them, She/Her"
+    },
+    {
+      "name": "context rendered in parentheses",
+      "input": [
+        {
+          "subjective": "he",
+          "objective": "him",
+          "possessive_adjective": "his",
+          "possessive_pronoun": "his",
+          "reflexive": "himself",
+          "context": "in professional contexts"
+        },
+        {
+          "subjective": "they",
+          "objective": "them",
+          "possessive_adjective": "their",
+          "possessive_pronoun": "theirs",
+          "reflexive": "themselves"
+        }
+      ],
+      "options": {
+        "form": "short"
+      },
+      "expected": "He/Him (in professional contexts), They/Them"
+    },
+    {
+      "name": "private set omitted from public display",
+      "input": [
+        {
+          "subjective": "she",
+          "objective": "her",
+          "possessive_adjective": "her",
+          "possessive_pronoun": "hers",
+          "reflexive": "herself",
+          "privacy": 0
+        },
+        {
+          "subjective": "they",
+          "objective": "them",
+          "possessive_adjective": "their",
+          "possessive_pronoun": "theirs",
+          "reflexive": "themselves",
+          "privacy": 1
+        }
+      ],
+      "options": {
+        "form": "short",
+        "audience": "public"
+      },
+      "expected": "She/Her"
+    },
+    {
+      "name": "special: any",
+      "input": [
+        {
+          "type": "any"
+        }
+      ],
+      "options": {
+        "form": "short"
+      },
+      "expected": "Any pronouns"
+    },
+    {
+      "name": "special: none",
+      "input": [
+        {
+          "type": "none"
+        }
+      ],
+      "options": {
+        "form": "short"
+      },
+      "expected": "No pronouns (use name)"
+    },
+    {
+      "name": "special: ask",
+      "input": [
+        {
+          "type": "ask"
+        }
+      ],
+      "options": {
+        "form": "short"
+      },
+      "expected": "Ask me my pronouns"
+    },
+    {
+      "name": "special: unspecified",
+      "input": [
+        {
+          "type": "unspecified"
+        }
+      ],
+      "options": {
+        "form": "short"
+      },
+      "expected": "Unspecified"
+    },
+    {
+      "name": "excluded set omitted from short display",
+      "input": [
+        {
+          "subjective": "he",
+          "objective": "him",
+          "possessive_adjective": "his",
+          "possessive_pronoun": "his",
+          "reflexive": "himself"
+        },
+        {
+          "subjective": "she",
+          "objective": "her",
+          "possessive_adjective": "her",
+          "possessive_pronoun": "hers",
+          "reflexive": "herself"
+        },
+        {
+          "subjective": "they",
+          "objective": "them",
+          "possessive_adjective": "their",
+          "possessive_pronoun": "theirs",
+          "reflexive": "themselves",
+          "exclude": true
+        }
+      ],
+      "options": {
+        "form": "short"
+      },
+      "expected": "He/Him, She/Her"
+    },
+    {
+      "name": "excluded set surfaced in detailed display",
+      "input": [
+        {
+          "subjective": "he",
+          "objective": "him",
+          "possessive_adjective": "his",
+          "possessive_pronoun": "his",
+          "reflexive": "himself"
+        },
+        {
+          "subjective": "she",
+          "objective": "her",
+          "possessive_adjective": "her",
+          "possessive_pronoun": "hers",
+          "reflexive": "herself"
+        },
+        {
+          "subjective": "they",
+          "objective": "them",
+          "possessive_adjective": "their",
+          "possessive_pronoun": "theirs",
+          "reflexive": "themselves",
+          "exclude": true
+        }
+      ],
+      "options": {
+        "form": "detailed"
+      },
+      "expected": "He/Him, She/Her (not They/Them)"
+    },
+    {
+      "name": "custom displayed verbatim",
+      "input": [
+        {
+          "type": "custom",
+          "display": "fae/faer"
+        }
+      ],
+      "options": {
+        "form": "short"
+      },
+      "expected": "Fae/Faer"
+    }
+  ]
+}

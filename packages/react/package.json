@@ -1,7 +1,17 @@
 {
   "name": "@openpronoun/react",
   "version": "0.0.0",
-  "description": "PLACEHOLDER — owned by maintainer.",
+  "description": "React components and hooks for collecting, displaying, and managing pronouns per the OpenPronoun specification.",
+  "keywords": [
+    "pronouns",
+    "she-her",
+    "they-them",
+    "gender",
+    "inclusive",
+    "react",
+    "openpronoun",
+    "accessibility"
+  ],
   "license": "MIT",
   "type": "module",
   "sideEffects": false,
@@ -14,45 +24,43 @@
   ],
   "exports": {
     ".": {
-      "import": {
-        "types": "./dist/index.d.ts",
-        "default": "./dist/index.js"
-      },
-      "require": {
-        "types": "./dist/index.d.cts",
-        "default": "./dist/index.cjs"
-      }
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
     }
   },
-  "main": "./dist/index.cjs",
-  "module": "./dist/index.js",
-  "types": "./dist/index.d.ts",
   "scripts": {
     "build": "tsup",
     "dev": "tsup --watch",
+    "lint": "eslint . --max-warnings 0",
+    "lint:fix": "eslint . --max-warnings 0 --fix",
+    "clean": "rm -rf .turbo node_modules dist",
     "test": "vitest run",
-    "lint": "eslint .",
-    "typecheck": "tsc --noEmit",
-    "check:exports": "publint && attw --pack ."
-  },
-  "dependencies": {
-    "@openpronoun/core": "^0.0.0"
-  },
-  "peerDependencies": {
-    "react": ">=18"
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage"
   },
   "devDependencies": {
-    "@arethetypeswrong/cli": "latest",
-    "@eslint/js": "latest",
-    "@types/react": "latest",
-    "@types/react-dom": "latest",
-    "eslint": "latest",
-    "publint": "latest",
-    "react": "latest",
-    "react-dom": "latest",
-    "tsup": "latest",
-    "typescript": "latest",
-    "typescript-eslint": "latest",
-    "vitest": "latest"
-  }
+    "@testing-library/react": "^16.3.2",
+    "@types/react": "^19.2.17",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^5.2.0",
+    "eslint": "^10.5.0",
+    "jsdom": "^29.1.1",
+    "tsup": "^8.5.1",
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.9"
+  },
+  "dependencies": {
+    "@dnd-kit/core": "^6.3.1",
+    "@dnd-kit/sortable": "^10.0.0",
+    "@openpronoun/core": "*",
+    "clsx": "^2.1.1",
+    "react-select": "^5.10.2"
+  },
+  "peerDependencies": {
+    "react": "^18.0.0 || ^19.0.0"
+  },
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts"
 }

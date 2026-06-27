@@ -1,7 +1,7 @@
 {
   "name": "@openpronoun/core",
   "version": "0.0.0",
-  "description": "PLACEHOLDER — owned by maintainer.",
+  "description": "Reference TypeScript implementation of the OpenPronoun specification — parsing, formatting, and validation.",
   "license": "MIT",
   "type": "module",
   "sideEffects": false,
@@ -35,14 +35,22 @@
     "typecheck": "tsc --noEmit",
     "check:exports": "publint && attw --pack ."
   },
+  "dependencies": {
+    "@openpronoun/zod": "*"
+  },
+  "peerDependencies": {
+    "zod": "^4"
+  },
   "devDependencies": {
     "@arethetypeswrong/cli": "latest",
     "@eslint/js": "latest",
+    "@openpronoun/conformance": "*",
     "eslint": "latest",
     "publint": "latest",
     "tsup": "latest",
     "typescript": "latest",
     "typescript-eslint": "latest",
-    "vitest": "latest"
+    "vitest": "latest",
+    "zod": "^4"
   }
 }

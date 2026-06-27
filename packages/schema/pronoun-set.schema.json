@@ -1,0 +1,64 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openpronoun.org/schemas/pronoun-set.schema.json",
+  "title": "PronounPreference",
+  "description": "An ordered collection of one or more pronoun entries. Each entry is a standard pronoun set, a special preference (any/none/ask), or a custom entry.",
+  "type": "array",
+  "minItems": 1,
+  "items": { "$ref": "#/$defs/pronounEntry" },
+
+  "$defs": {
+    "pronounEntry": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "subjective": { "type": "string", "minLength": 1 },
+        "objective": { "type": "string", "minLength": 1 },
+        "possessive_adjective": { "type": "string", "minLength": 1 },
+        "possessive_pronoun": { "type": "string", "minLength": 1 },
+        "reflexive": { "type": "string", "minLength": 1 },
+
+        "sub": { "type": "string", "minLength": 1 },
+        "obj": { "type": "string", "minLength": 1 },
+        "p_a": { "type": "string", "minLength": 1 },
+        "p_pn": { "type": "string", "minLength": 1 },
+        "ref": { "type": "string", "minLength": 1 },
+
+        "type": { "enum": ["any", "none", "ask", "unspecified", "custom"] },
+        "display": { "type": "string", "minLength": 1 },
+
+        "ranking": { "type": "integer" },
+        "rnk": { "type": "integer" },
+        "exclude": { "type": "boolean" },
+        "exc": { "type": "boolean" },
+        "context": { "type": "string" },
+        "ctx": { "type": "string" },
+        "privacy": { "type": "integer", "minimum": 0 },
+        "pvc": { "type": "integer", "minimum": 0 },
+        "language": { "type": "string", "pattern": "^[a-z]{2}$" },
+        "lang": { "type": "string", "pattern": "^[a-z]{2}$" }
+      },
+
+      "allOf": [
+        {
+          "$comment": "A standard set (no type) MUST provide all five forms, in either full or compact keys.",
+          "if": { "not": { "required": ["type"] } },
+          "then": {
+            "oneOf": [
+              { "required": ["subjective", "objective", "possessive_adjective", "possessive_pronoun", "reflexive"] },
+              { "required": ["sub", "obj", "p_a", "p_pn", "ref"] }
+            ]
+          }
+        },
+        {
+          "$comment": "A custom entry MUST carry a display string; form fields are optional.",
+          "if": {
+            "properties": { "type": { "const": "custom" } },
+            "required": ["type"]
+          },
+          "then": { "required": ["display"] }
+        }
+      ]
+    }
+  }
+}
