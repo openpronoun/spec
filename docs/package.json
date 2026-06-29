@@ -10,8 +10,8 @@
     "typecheck": "astro check"
   },
   "dependencies": {
-    "@openpronoun/core": "^0.0.0",
-    "@openpronoun/react": "^0.0.0",
+    "@openpronoun/core": "*",
+    "@openpronoun/react": "*",
     "zod": "^4"
   },
   "devDependencies": {
