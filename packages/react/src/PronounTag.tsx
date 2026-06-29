@@ -1,6 +1,5 @@
 import clsx from "clsx";
 import React from "react";
-import type { GroupBase, MultiValueGenericProps, MultiValueRemoveProps } from "react-select";
 
 import type { PronounTagClassNames } from "./classNames";
 import { isStandardSet } from "./pronounUtils";
@@ -9,120 +8,92 @@ import { defaultIcons } from "./theme";
 import type { PronounIconConfig } from "./theme";
 import type { PronounOption } from "./types";
 
-/**
- * Props for the PronounTag components
- */
-interface PronounTagProps {
-  /** Callback when edit button is clicked (only for standard sets) */
-  onEditPronounSet: (pronounSet: PronounSet) => void;
+export interface PronounTagProps {
+  classNames?: PronounTagClassNames;
+  icons?: PronounIconConfig;
+  id: string;
+  onEdit?: (pronounSet: PronounSet) => void;
+  onRemove?: (id: string) => void;
+  option: PronounOption;
 }
 
-/**
- * Custom container for the multi-value component
- */
-export const CustomMultiValueContainer = (
-  props: MultiValueGenericProps<PronounOption, true, GroupBase<PronounOption>>,
-) => {
-  const data = props.data as PronounOption;
-  const tagClassNames = (
-    props.selectProps as { tagClassNames?: PronounTagClassNames }
-  ).tagClassNames;
+export const PronounTag: React.FC<PronounTagProps> = ({
+  classNames,
+  icons = defaultIcons,
+  id,
+  onEdit,
+  onRemove,
+  option,
+}) => {
+  const entry = option.value;
+  const label = option.label;
+
+  const handleEditClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (isStandardSet(entry)) onEdit?.(entry as PronounSet);
+  };
+
+  const handleEditKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      e.stopPropagation();
+      if (isStandardSet(entry)) onEdit?.(entry as PronounSet);
+    }
+  };
+
+  const handleRemoveClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onRemove?.(id);
+  };
 
   return (
     <div
-      {...(props.innerProps as React.HTMLAttributes<HTMLDivElement>)}
-      className={clsx("pronoun-tag-container", tagClassNames?.container)}
-      data-id={data.id}
+      className={clsx("pronoun-tag-container", classNames?.container)}
+      data-id={id}
     >
-      {props.children}
-    </div>
-  );
-};
-
-/**
- * Custom label for the multi-value component
- */
-export const CustomMultiValueLabel = (
-  props: MultiValueGenericProps<PronounOption, true, GroupBase<PronounOption>>,
-) => {
-  const icons =
-    (props.selectProps as { icons?: PronounIconConfig })?.icons ?? defaultIcons;
-  const tagClassNames = (
-    props.selectProps as { tagClassNames?: PronounTagClassNames }
-  ).tagClassNames;
-
-  return (
-    <span className={clsx("pronoun-tag-label", tagClassNames?.label)}>
-      <span
-        aria-hidden="true"
-        className={clsx("pronoun-drag-handle", tagClassNames?.dragHandle)}
-      >
-        {icons.dragHandle}
-      </span>
-      {props.children}
-    </span>
-  );
-};
-
-/**
- * Custom remove button for the multi-value component.
- * Adds an edit button for standard (non-special) pronoun sets.
- */
-export const CustomMultiValueRemove = (
-  props: MultiValueRemoveProps<PronounOption, true, GroupBase<PronounOption>> &
-    PronounTagProps,
-) => {
-  const { data, onEditPronounSet } = props;
-  const entry = data.value;
-  const icons =
-    (props.selectProps as { icons?: PronounIconConfig })?.icons ?? defaultIcons;
-  const tagClassNames = (
-    props.selectProps as { tagClassNames?: PronounTagClassNames }
-  ).tagClassNames;
-
-  // Only standard sets (no `type` field) get an edit button
-  if (isStandardSet(entry)) {
-    return (
-      <div className={clsx("pronoun-tag-actions", tagClassNames?.actions)}>
-        <button
-          aria-label={`Edit ${data.label} pronoun set`}
-          className={clsx("pronoun-tag-edit", tagClassNames?.editButton)}
-          onClick={(e) => {
-            e.stopPropagation();
-            onEditPronounSet(entry);
-          }}
-          onKeyDown={(e) => {
-            if (e.key === "Enter" || e.key === " ") {
-              e.preventDefault();
-              e.stopPropagation();
-              onEditPronounSet(entry);
-            }
-          }}
-          tabIndex={0}
-          type="button"
+      <span className={clsx("pronoun-tag-label", classNames?.label)}>
+        <span
+          aria-hidden="true"
+          className={clsx("pronoun-drag-handle", classNames?.dragHandle)}
         >
-          <span aria-hidden="true">{icons.edit}</span>
-        </button>
+          {icons.dragHandle}
+        </span>
+        {label}
+      </span>
+
+      {isStandardSet(entry) && onEdit ? (
+        <div className={clsx("pronoun-tag-actions", classNames?.actions)}>
+          <button
+            aria-label={`Edit ${label} pronoun set`}
+            className={clsx("pronoun-tag-edit", classNames?.editButton)}
+            onClick={handleEditClick}
+            onKeyDown={handleEditKeyDown}
+            tabIndex={0}
+            type="button"
+          >
+            <span aria-hidden="true">{icons.edit}</span>
+          </button>
+          <button
+            aria-label={`Remove ${label}`}
+            className={clsx("pronoun-tag-remove", classNames?.removeButton)}
+            onClick={handleRemoveClick}
+            type="button"
+          >
+            <span aria-hidden="true">{icons.remove}</span>
+          </button>
+        </div>
+      ) : (
         <button
-          {...(props.innerProps as React.HTMLAttributes<HTMLButtonElement>)}
-          aria-label={`Remove ${data.label}`}
-          className={clsx("pronoun-tag-remove", tagClassNames?.removeButton)}
+          aria-label={`Remove ${label}`}
+          className={clsx("pronoun-tag-remove", classNames?.removeButton)}
+          onClick={handleRemoveClick}
           type="button"
         >
           <span aria-hidden="true">{icons.remove}</span>
         </button>
-      </div>
-    );
-  }
-
-  return (
-    <button
-      {...(props.innerProps as React.HTMLAttributes<HTMLButtonElement>)}
-      aria-label={`Remove ${data.label}`}
-      className={clsx("pronoun-tag-remove", tagClassNames?.removeButton)}
-      type="button"
-    >
-      <span aria-hidden="true">{icons.remove}</span>
-    </button>
+      )}
+    </div>
   );
 };
+
+export default PronounTag;

@@ -12,7 +12,7 @@ import { PronounSelector } from "./PronounSelector";
 import { darkTheme } from "./theme";
 import type { PronounTheme } from "./theme";
 
-// Test wrapper component to manage state
+// Test wrapper managing state
 const TestWrapper = ({
   initialValue = [],
   theme = undefined,
@@ -34,10 +34,8 @@ describe("PronounSelector", () => {
   test("renders with empty value", () => {
     render(<TestWrapper />);
 
-    // Check that the component renders
+    // Ark UI Combobox.Input carries role="combobox"
     expect(screen.getByRole("combobox")).toBeDefined();
-
-    // Check that no pronouns are selected
     expect(screen.getByTestId("selected-count").textContent).toBe("0");
   });
 
@@ -45,45 +43,31 @@ describe("PronounSelector", () => {
     const initialValue = [COMMON_PRONOUN_SETS.HE, COMMON_PRONOUN_SETS.SHE];
     render(<TestWrapper initialValue={initialValue} />);
 
-    // Check that the component renders
     expect(screen.getByRole("combobox")).toBeDefined();
-
-    // Check that two pronouns are selected
     expect(screen.getByTestId("selected-count").textContent).toBe("2");
 
-    // Check that the selected pronouns are displayed
-    expect(screen.getByText(/he\/him/i)).toBeDefined();
-    expect(screen.getByText(/she\/her/i)).toBeDefined();
+    // Selected pronouns are rendered as tags in the control (also appear in hidden listbox)
+    expect(screen.getAllByText(/he\/him/i).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/she\/her/i).length).toBeGreaterThan(0);
   });
 
   test("renders with neopronouns", () => {
-    // Use only XE for this test since it's rendering correctly
     const initialValue = [KNOWN_NEOPRONOUN_SETS.XE];
     render(<TestWrapper initialValue={initialValue} />);
 
-    // Check that the component renders
     expect(screen.getByRole("combobox")).toBeDefined();
-
-    // Check that one pronoun is selected
     expect(screen.getByTestId("selected-count").textContent).toBe("1");
-
-    // Check that the selected pronoun is displayed
-    expect(screen.getByText(/xe\/xem/i)).toBeDefined();
+    expect(screen.getAllByText(/xe\/xem/i).length).toBeGreaterThan(0);
   });
 
   test("renders with special pronouns", () => {
     const initialValue = [SPECIAL_PRONOUN_SETS.ANY, SPECIAL_PRONOUN_SETS.NONE];
     render(<TestWrapper initialValue={initialValue} />);
 
-    // Check that the component renders
     expect(screen.getByRole("combobox")).toBeDefined();
-
-    // Check that two pronouns are selected
     expect(screen.getByTestId("selected-count").textContent).toBe("2");
-
-    // Check that the selected pronouns are displayed
-    expect(screen.getByText(/any pronouns/i)).toBeDefined();
-    expect(screen.getByText(/no pronouns/i)).toBeDefined();
+    expect(screen.getAllByText(/any pronouns/i).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/no pronouns/i).length).toBeGreaterThan(0);
   });
 
   test("renders with mixed pronouns", () => {
@@ -94,16 +78,11 @@ describe("PronounSelector", () => {
     ];
     render(<TestWrapper initialValue={initialValue} />);
 
-    // Check that the component renders
     expect(screen.getByRole("combobox")).toBeDefined();
-
-    // Check that three pronouns are selected
     expect(screen.getByTestId("selected-count").textContent).toBe("3");
-
-    // Check that the selected pronouns are displayed
-    expect(screen.getByText(/they\/them/i)).toBeDefined();
-    expect(screen.getByText(/fae\/faer/i)).toBeDefined();
-    expect(screen.getByText(/ask me/i)).toBeDefined();
+    expect(screen.getAllByText(/they\/them/i).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/fae\/faer/i).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/ask me/i).length).toBeGreaterThan(0);
   });
 
   test("renders with custom pronouns", () => {
@@ -116,23 +95,15 @@ describe("PronounSelector", () => {
       subjective: "co",
     };
 
-    const initialValue = [customPronounSet];
-    render(<TestWrapper initialValue={initialValue} />);
+    render(<TestWrapper initialValue={[customPronounSet]} />);
 
-    // Check that the component renders
     expect(screen.getByRole("combobox")).toBeDefined();
-
-    // Check that one pronoun is selected
     expect(screen.getByTestId("selected-count").textContent).toBe("1");
-
-    // Check that the selected pronoun is displayed
-    expect(screen.getByText(/co\/cos/i)).toBeDefined();
+    expect(screen.getAllByText(/co\/cos/i).length).toBeGreaterThan(0);
   });
 
   test("renders with dark theme", () => {
     render(<TestWrapper theme={darkTheme} />);
-
-    // Check that the component renders
     expect(screen.getByRole("combobox")).toBeDefined();
   });
 });

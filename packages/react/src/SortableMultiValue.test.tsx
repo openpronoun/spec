@@ -5,80 +5,87 @@ import { describe, expect, test, vi } from "vitest";
 
 import type { PronounOption } from "./types";
 
-// Mock the entire SortableMultiValue module to avoid DnD dependencies
-vi.mock("./SortableMultiValue", () => ({
-  default: ({
-    children,
-    data,
-    isDragging,
-  }: {
-    children: React.ReactNode;
-    data: { id: string };
-    isDragging: boolean;
-  }) => (
-    <div
-      className={`pronoun-multi-value ${isDragging ? "is-dragging" : ""}`}
-      data-id={(data as { id: string }).id}
-      data-testid="sortable-multi-value"
-    >
-      {children}
-    </div>
-  ),
+// Mock dnd-kit to avoid needing a DndContext in tests
+vi.mock("@dnd-kit/sortable", () => ({
+  useSortable: () => ({
+    attributes: {},
+    isDragging: false,
+    listeners: {},
+    setNodeRef: () => {},
+    transform: null,
+    transition: undefined,
+  }),
 }));
 
-// Import the component after mocking
-import SortableMultiValue from "./SortableMultiValue";
+import { SortableMultiValue } from "./SortableMultiValue";
+import { defaultIcons } from "./theme";
 
-// Cast to mock type so TypeScript accepts isDragging as a prop in tests
-const MockedSortableMultiValue = SortableMultiValue as unknown as React.FC<{
-  children?: React.ReactNode;
-  data: PronounOption;
-  isDragging: boolean;
-}>;
+const mockOption: PronounOption = {
+  id: "they-them-0",
+  label: "they/them",
+  value: {
+    language: "en",
+    objective: "them",
+    possessive_adjective: "their",
+    possessive_pronoun: "theirs",
+    reflexive: "themself",
+    subjective: "they",
+  } as PronounEntry,
+};
 
 describe("SortableMultiValue", () => {
-  // Test data
-  const mockPronounOption: PronounOption = {
-    id: "they-them-0",
-    label: "they/them",
-    value: {
-      language: "en",
-      objective: "them",
-      possessive_adjective: "their",
-      possessive_pronoun: "theirs",
-      reflexive: "themself",
-      subjective: "they",
-    } as PronounEntry,
-  };
-
-  test("renders with correct data-id", () => {
-    const { getByTestId } = render(
-      <MockedSortableMultiValue
-        data={mockPronounOption}
-        isDragging={false}
-      >
-        <div>Test Content</div>
-      </MockedSortableMultiValue>,
+  test("renders pronoun-multi-value wrapper", () => {
+    const { container } = render(
+      <SortableMultiValue icons={defaultIcons} id="they-them-0" option={mockOption} />,
     );
-
-    const element = getByTestId("sortable-multi-value");
-    expect(element).toBeDefined();
-    expect(element.getAttribute("data-id")).toBe("they-them-0");
-    expect(element.textContent).toBe("Test Content");
-    expect(element.className).not.toContain("is-dragging");
+    expect(container.querySelector(".pronoun-multi-value")).toBeTruthy();
   });
 
-  test("applies dragging class when isDragging is true", () => {
-    const { getByTestId } = render(
-      <MockedSortableMultiValue
-        data={mockPronounOption}
-        isDragging={true}
-      >
-        <div>Test Content</div>
-      </MockedSortableMultiValue>,
+  test("renders inner PronounTag with correct data-id", () => {
+    const { container } = render(
+      <SortableMultiValue icons={defaultIcons} id="they-them-0" option={mockOption} />,
     );
+    expect(container.querySelector(".pronoun-tag-container")?.getAttribute("data-id")).toBe("they-them-0");
+  });
 
-    const element = getByTestId("sortable-multi-value");
-    expect(element.className).toContain("is-dragging");
+  test("applies sortable root className", () => {
+    const { container } = render(
+      <SortableMultiValue
+        classNames={{ root: "custom-root" }}
+        icons={defaultIcons}
+        id="they-them-0"
+        option={mockOption}
+      />,
+    );
+    expect(container.querySelector(".pronoun-multi-value.custom-root")).toBeTruthy();
+  });
+
+  test("forwards onEdit and onRemove to PronounTag", () => {
+    const onEdit = vi.fn();
+    const onRemove = vi.fn();
+    const { container } = render(
+      <SortableMultiValue
+        icons={defaultIcons}
+        id="they-them-0"
+        onEdit={onEdit}
+        onRemove={onRemove}
+        option={mockOption}
+      />,
+    );
+    // Edit and remove buttons should be present (standard set + onEdit provided)
+    expect(container.querySelector(".pronoun-tag-edit")).toBeTruthy();
+    expect(container.querySelector(".pronoun-tag-remove")).toBeTruthy();
+  });
+
+  test("forwards tagClassNames to PronounTag", () => {
+    const { container } = render(
+      <SortableMultiValue
+        icons={defaultIcons}
+        id="they-them-0"
+        option={mockOption}
+        tagClassNames={{ container: "custom-tag-container" }}
+      />,
+    );
+    expect(container.querySelector(".pronoun-tag-container.custom-tag-container")).toBeTruthy();
   });
 });

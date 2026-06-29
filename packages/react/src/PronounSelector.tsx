@@ -1,5 +1,6 @@
 "use client";
 
+import { Combobox, createListCollection } from "@ark-ui/react/combobox";
 import {
   closestCenter,
   DndContext,
@@ -15,17 +16,10 @@ import {
   SortableContext,
 } from "@dnd-kit/sortable";
 import clsx from "clsx";
-import React, { useMemo, useRef, useState } from "react";
-import Select, { components } from "react-select";
-import type { ActionMeta, GroupBase, MultiValue } from "react-select";
+import React, { useMemo, useState } from "react";
 
-import {
-  BadgeGroupHeading,
-  BadgeOption,
-  createBadgeMenuWithEditor,
-} from "./BadgeMenuComponents";
 import PronounDetailEditor from "./PronounDetailEditor";
-import { formatGroupLabel, formatOptionLabel } from "./PronounOptionFormatter";
+import { formatOptionLabel } from "./PronounOptionFormatter";
 import {
   COMMON_PRONOUN_SETS,
   createExampleSentences,
@@ -38,13 +32,8 @@ import {
   SPECIAL_PRONOUN_SETS,
 } from "./pronounUtils";
 import type { PronounEntry, PronounSet } from "./pronounUtils";
-import { getCustomStyles, getPronounSelectorStyles } from "./styles";
+import { getPronounCSSVars, getPronounSelectorStyles } from "./styles";
 import { defaultTheme, mergeIcons, mergeTheme } from "./theme";
-import {
-  CustomMultiValueContainer,
-  CustomMultiValueLabel,
-  CustomMultiValueRemove,
-} from "./PronounTag";
 import SortableMultiValue from "./SortableMultiValue";
 import type {
   PronounOption,
@@ -52,9 +41,8 @@ import type {
   PronounSelectorProps,
 } from "./types";
 
-/**
- * PronounSelector component for selecting pronoun sets
- */
+const CREATE_SENTINEL_VALUE = "__create-custom__";
+
 export const PronounSelector: React.FC<PronounSelectorProps> = ({
   "aria-label": ariaLabel = "Pronoun selector",
   className,
@@ -72,7 +60,6 @@ export const PronounSelector: React.FC<PronounSelectorProps> = ({
   theme,
   value = [],
 }) => {
-  // Compute effective compact mode: dropdownMode takes precedence over compactOptions
   const effectiveCompact =
     dropdownMode === "expanded"
       ? false
@@ -80,10 +67,9 @@ export const PronounSelector: React.FC<PronounSelectorProps> = ({
         ? true
         : compactOptions;
 
-  const [editingPronounSet, setEditingPronounSet] = useState<null | PronounSet>(
-    null,
-  );
-  const selectContainerRef = useRef<HTMLDivElement>(null);
+  const [editingPronounSet, setEditingPronounSet] = useState<null | PronounSet>(null);
+  const [inputValue, setInputValue] = useState("");
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [, setActiveId] = useState<null | UniqueIdentifier>(null);
 
   const resolvedTheme = theme ? mergeTheme(theme) : defaultTheme;
@@ -94,65 +80,101 @@ export const PronounSelector: React.FC<PronounSelectorProps> = ({
     useSensor(KeyboardSensor),
   );
 
-  const customStyles = getCustomStyles(resolvedTheme);
+  // ── Option lists ──────────────────────────────────────────────────────────
 
-  // Build option lists from the core dictionary
-  const commonOptions: PronounOption[] = Object.values(COMMON_PRONOUN_SETS).map(
-    (set) => ({
-      examples: createExampleSentences(set).slice(0, 2),
-      label: formatPronounSet(set, { format: "short" }),
-      value: set,
-    }),
+  const commonOptions: PronounOption[] = useMemo(
+    () =>
+      Object.values(COMMON_PRONOUN_SETS).map((set) => ({
+        examples: createExampleSentences(set).slice(0, 2),
+        id: `common-${formatPronounSet(set, { format: "short" })}`,
+        label: formatPronounSet(set, { format: "short" }),
+        value: set,
+      })),
+    [],
   );
 
-  const neoOptions: PronounOption[] = Object.values(KNOWN_NEOPRONOUN_SETS).map(
-    (set) => ({
-      examples: createExampleSentences(set).slice(0, 2),
-      label: formatPronounSet(set, { format: "short" }),
-      value: set,
-    }),
+  const neoOptions: PronounOption[] = useMemo(
+    () =>
+      Object.values(KNOWN_NEOPRONOUN_SETS).map((set) => ({
+        examples: createExampleSentences(set).slice(0, 2),
+        id: `neo-${formatPronounSet(set, { format: "short" })}`,
+        label: formatPronounSet(set, { format: "short" }),
+        value: set,
+      })),
+    [],
   );
 
-  const specialOptions: PronounOption[] = Object.values(
-    SPECIAL_PRONOUN_SETS,
-  ).map((set) => {
-    let label = "";
-    if (set.type === PronounType.ANY) label = "Any pronouns";
-    else if (set.type === PronounType.NONE) label = "No pronouns (use name)";
-    else if (set.type === PronounType.ASK) label = "Ask me";
-    else if (set.type === PronounType.UNSPECIFIED) label = "Unspecified";
+  const specialOptions: PronounOption[] = useMemo(
+    () =>
+      Object.values(SPECIAL_PRONOUN_SETS).map((set) => {
+        let label = "";
+        if (set.type === PronounType.ANY) label = "Any pronouns";
+        else if (set.type === PronounType.NONE) label = "No pronouns (use name)";
+        else if (set.type === PronounType.ASK) label = "Ask me";
+        else if (set.type === PronounType.UNSPECIFIED) label = "Unspecified";
+        return { id: `special-${set.type}`, label, value: set };
+      }),
+    [],
+  );
 
-    return { label, value: set };
-  });
+  const createCustomOption: PronounOption = useMemo(
+    () => ({
+      id: CREATE_SENTINEL_VALUE,
+      isCreate: true,
+      isCustom: true,
+      label: "Create custom pronoun set",
+      value: { type: "custom", display: "" },
+    }),
+    [],
+  );
 
-  // Sentinel option that opens the custom editor
-  const createCustomOption: PronounOption = {
-    isCreate: true,
-    isCustom: true,
-    label: "Create custom pronoun set",
-    value: { type: "custom", display: "" }, // placeholder; never surfaced to onChange
-  };
+  const groupedOptions: PronounOptionGroup[] = useMemo(
+    () => [
+      { label: "Common Pronouns", options: commonOptions },
+      { label: "Neopronouns", options: neoOptions },
+      { label: "Special Options", options: specialOptions },
+      { label: "Custom", options: [createCustomOption] },
+    ],
+    [commonOptions, neoOptions, specialOptions, createCustomOption],
+  );
 
-  const groupedOptions: PronounOptionGroup[] = [
-    { label: "Common Pronouns", options: commonOptions },
-    { label: "Neopronouns", options: neoOptions },
-    { label: "Special Options", options: specialOptions },
-    { label: "Custom", options: [createCustomOption] },
-  ];
+  const allOptions = useMemo(
+    () => groupedOptions.flatMap((g) => g.options),
+    [groupedOptions],
+  );
 
-  const flatOptions = groupedOptions.flatMap((g) => g.options);
+  // ── Filtering ─────────────────────────────────────────────────────────────
 
-  const findOptionInGroups = (
-    predicate: (option: PronounOption) => boolean,
-  ): PronounOption | undefined => {
-    for (const group of groupedOptions) {
-      const found = group.options.find(predicate);
-      if (found) return found;
-    }
-    return undefined;
-  };
+  const filteredOptions = useMemo(() => {
+    if (!inputValue) return allOptions;
+    const lower = inputValue.toLowerCase();
+    return allOptions.filter(
+      (opt) => opt.isCreate || opt.label.toLowerCase().includes(lower),
+    );
+  }, [allOptions, inputValue]);
 
-  // Map current value to react-select options
+  const filteredGroupedOptions = useMemo(() => {
+    if (!inputValue) return groupedOptions;
+    const filteredSet = new Set(filteredOptions);
+    return groupedOptions
+      .map((g) => ({ ...g, options: g.options.filter((o) => filteredSet.has(o)) }))
+      .filter((g) => g.options.length > 0);
+  }, [groupedOptions, filteredOptions, inputValue]);
+
+  // ── Ark UI collection ─────────────────────────────────────────────────────
+
+  const collection = useMemo(
+    () =>
+      createListCollection({
+        itemToString: (item) => item.label,
+        itemToValue: (item) => item.id ?? item.label,
+        items: filteredOptions,
+      }),
+    [filteredOptions],
+  );
+
+  // ── Selected options ──────────────────────────────────────────────────────
+
   const selectedOptions: PronounOption[] = useMemo(() => {
     return value.map((entry, index) => {
       if (!entry) {
@@ -164,8 +186,7 @@ export const PronounSelector: React.FC<PronounSelectorProps> = ({
       }
 
       if (!isStandardSet(entry)) {
-        // Special or custom entry — match by type
-        const matchingOption = findOptionInGroups(
+        const matchingOption = allOptions.find(
           (opt) =>
             !isStandardSet(opt.value) &&
             (opt.value as { type: string }).type ===
@@ -178,14 +199,13 @@ export const PronounSelector: React.FC<PronounSelectorProps> = ({
           };
         }
       } else {
-        // Standard pronoun set — match by subjective + objective
         const sub = getSubjective(entry);
         const obl = getObjective(entry);
         const formattedLabel = formatPronounSet(entry, {
           format: "short",
           includeContext: true,
         });
-        const matchingOption = findOptionInGroups(
+        const matchingOption = allOptions.find(
           (opt) =>
             isStandardSet(opt.value) &&
             getSubjective(opt.value) === sub &&
@@ -198,7 +218,6 @@ export const PronounSelector: React.FC<PronounSelectorProps> = ({
             label: entry.context ? formattedLabel : matchingOption.label,
           };
         }
-        // Not in the dictionary — user-entered custom set
         return {
           id: `custom-${sub}-${obl}-${index}`,
           isCustom: true,
@@ -207,36 +226,67 @@ export const PronounSelector: React.FC<PronounSelectorProps> = ({
         };
       }
 
-      // Fallback: render as-is
       return {
         id: `entry-${index}`,
         label: formatPronounSet(entry, { format: "short" }),
         value: entry,
       };
     });
-  }, [value]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [value, allOptions]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const handleChange = (
-    newValue: MultiValue<PronounOption>,
-    actionMeta: ActionMeta<PronounOption>,
-  ) => {
-    if (
-      actionMeta.action === "select-option" &&
-      actionMeta.option?.isCreate
-    ) {
-      // Remove the sentinel from the selection and open the editor
-      const filteredValue = newValue.filter((opt) => !opt.isCreate);
+  // selectedValues must use the same IDs as collection.itemToValue so Ark UI can
+  // correctly track which items are selected (distinct from dnd-kit's index IDs).
+  const selectedValues = useMemo(() => {
+    return value.flatMap((entry): string[] => {
+      if (!entry) return [];
+      if (!isStandardSet(entry)) {
+        const match = allOptions.find(
+          (o) =>
+            !isStandardSet(o.value) &&
+            (o.value as { type: string }).type ===
+              (entry as { type: string }).type,
+        );
+        return match ? [match.id ?? match.label] : [];
+      }
+      const sub = getSubjective(entry);
+      const obl = getObjective(entry);
+      const match = allOptions.find(
+        (o) =>
+          isStandardSet(o.value) &&
+          getSubjective(o.value) === sub &&
+          getObjective(o.value) === obl,
+      );
+      return match ? [match.id ?? match.label] : [];
+    });
+  }, [value, allOptions]);
+
+  // ── Handlers ──────────────────────────────────────────────────────────────
+
+  const handleValueChange = ({ value: newValues }: { value: string[] }) => {
+    if (newValues.includes(CREATE_SENTINEL_VALUE)) {
       setEditingPronounSet({
-        subjective: "",
         objective: "",
         possessive_adjective: "",
         possessive_pronoun: "",
         reflexive: "",
+        subjective: "",
       } as PronounSet);
-      onChange(filteredValue.map((opt) => opt.value));
-    } else {
-      onChange(newValue.map((opt) => opt.value));
+      return;
     }
+    const newEntries = newValues
+      .map((v) => allOptions.find((o) => (o.id ?? o.label) === v)?.value)
+      .filter((e): e is PronounEntry => e !== undefined);
+    onChange(newEntries);
+    setInputValue("");
+  };
+
+  const handleInputChange = ({ inputValue: next }: { inputValue: string }) => {
+    setInputValue(next);
+  };
+
+  const handleOpenChange = ({ open }: { open: boolean }) => {
+    if (!open && editingPronounSet) return;
+    setIsMenuOpen(open);
   };
 
   const handleEditPronounSet = (pronounSet: PronounSet) => {
@@ -244,12 +294,8 @@ export const PronounSelector: React.FC<PronounSelectorProps> = ({
   };
 
   const handleSavePronounSet = (editedSet: PronounSet) => {
-    const editSub = editingPronounSet
-      ? getSubjective(editingPronounSet)
-      : "";
-    const editObj = editingPronounSet
-      ? getObjective(editingPronounSet)
-      : "";
+    const editSub = editingPronounSet ? getSubjective(editingPronounSet) : "";
+    const editObj = editingPronounSet ? getObjective(editingPronounSet) : "";
     const isNewSet = !editSub && !editObj;
 
     if (isNewSet) {
@@ -283,9 +329,7 @@ export const PronounSelector: React.FC<PronounSelectorProps> = ({
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
     if (over && active.id !== over.id) {
-      const oldIndex = selectedOptions.findIndex(
-        (opt) => opt.id === active.id,
-      );
+      const oldIndex = selectedOptions.findIndex((opt) => opt.id === active.id);
       const newIndex = selectedOptions.findIndex((opt) => opt.id === over.id);
       if (oldIndex !== -1 && newIndex !== -1) {
         onChange(arrayMove(value, oldIndex, newIndex));
@@ -294,10 +338,36 @@ export const PronounSelector: React.FC<PronounSelectorProps> = ({
     setActiveId(null);
   };
 
+  // ── Badge mode option click ───────────────────────────────────────────────
+
+  const handleBadgeClick = (opt: PronounOption) => {
+    if (opt.isCreate) {
+      setEditingPronounSet({
+        objective: "",
+        possessive_adjective: "",
+        possessive_pronoun: "",
+        reflexive: "",
+        subjective: "",
+      } as PronounSet);
+      return;
+    }
+    const optId = opt.id ?? opt.label;
+    const isSelected = selectedValues.includes(optId);
+    handleValueChange({
+      value: isSelected
+        ? selectedValues.filter((v) => v !== optId)
+        : [...selectedValues, optId],
+    });
+  };
+
+  // ── Render ────────────────────────────────────────────────────────────────
+
+  const displayGroups = grouped ? filteredGroupedOptions : [{ label: "", options: filteredOptions }];
+
   return (
     <div
       className={clsx("pronoun-selector", className, classNames?.root)}
-      ref={selectContainerRef}
+      style={getPronounCSSVars(resolvedTheme)}
     >
       {originalText && (
         <div
@@ -319,118 +389,233 @@ export const PronounSelector: React.FC<PronounSelectorProps> = ({
           <span style={{ fontStyle: "italic" }}>{originalText}</span>
         </div>
       )}
+
       <DndContext
         collisionDetection={closestCenter}
         onDragEnd={handleDragEnd}
         onDragStart={handleDragStart}
         sensors={sensors}
       >
-        <SortableContext
-          items={selectedOptions.map((opt) => opt.id || "")}
-          strategy={horizontalListSortingStrategy}
+        <Combobox.Root
+          collection={collection}
+          disabled={disabled}
+          id={id}
+          inputBehavior="none"
+          inputValue={inputValue}
+          multiple
+          onInputValueChange={handleInputChange}
+          onOpenChange={handleOpenChange}
+          onValueChange={handleValueChange}
+          open={editingPronounSet ? true : isMenuOpen}
+          value={selectedValues}
         >
-          <Select<PronounOption, true, GroupBase<PronounOption>>
-            aria-describedby="pronoun-selector-description"
+          <Combobox.Control
             aria-label={ariaLabel}
-            blurInputOnSelect={editingPronounSet ? false : undefined}
-            classNamePrefix="pronoun-select"
-            closeMenuOnSelect={false}
-            components={{
-              ...(dropdownMode === "badges"
-                ? {
-                    GroupHeading: BadgeGroupHeading,
-                    Menu: createBadgeMenuWithEditor(
-                      editingPronounSet,
-                      handleCancelEdit,
-                      handleSavePronounSet,
-                      classNames,
-                      resolvedIcons,
-                      theme,
-                    ),
-                    Option: BadgeOption,
-                  }
-                : {
-                    Menu: (props) => (
-                      <div
-                        onClick={(e) =>
-                          editingPronounSet && e.stopPropagation()
-                        }
-                        onMouseDown={(e) =>
-                          editingPronounSet && e.stopPropagation()
-                        }
-                      >
-                        <components.Menu {...props}>
-                          {props.children}
-                          {editingPronounSet && (
-                            <div
-                              className={clsx(
-                                "pronoun-detail-editor-container",
-                                classNames?.editorContainer,
-                              )}
-                              onClick={(e) => e.stopPropagation()}
-                              onMouseDown={(e) => e.stopPropagation()}
-                            >
-                              <PronounDetailEditor
-                                classNames={classNames?.editor}
-                                icons={resolvedIcons}
-                                onCancel={handleCancelEdit}
-                                onSave={handleSavePronounSet}
-                                pronounSet={editingPronounSet}
-                                theme={theme}
-                              />
-                            </div>
-                          )}
-                        </components.Menu>
-                      </div>
-                    ),
-                  }),
-              MultiValue: SortableMultiValue,
-              MultiValueContainer: CustomMultiValueContainer,
-              MultiValueLabel: CustomMultiValueLabel,
-              MultiValueRemove: (props) => (
-                <CustomMultiValueRemove
-                  {...props}
-                  onEditPronounSet={handleEditPronounSet}
+            className={clsx("pronoun-select__control", classNames?.control)}
+          >
+            <SortableContext
+              items={selectedOptions.map((opt) => opt.id ?? "")}
+              strategy={horizontalListSortingStrategy}
+            >
+              {selectedOptions.map((opt) => (
+                <SortableMultiValue
+                  key={opt.id}
+                  classNames={classNames?.sortableValue}
+                  icons={resolvedIcons}
+                  id={opt.id ?? opt.label}
+                  onEdit={handleEditPronounSet}
+                  onRemove={(removeId) => {
+                    const idx = selectedOptions.findIndex((o) => o.id === removeId);
+                    if (idx !== -1) onChange(value.filter((_, i) => i !== idx));
+                  }}
+                  option={opt}
+                  tagClassNames={classNames?.tag}
                 />
-              ),
-            }}
-            formatGroupLabel={(group) =>
-              formatGroupLabel(group, classNames?.option)
-            }
-            formatOptionLabel={(option, meta) =>
-              formatOptionLabel(
-                option,
-                meta,
-                resolvedIcons,
-                classNames?.option,
-                effectiveCompact,
-              )
-            }
-            {...({
-              badgeClassNames: classNames,
-              badgeTheme: resolvedTheme,
-              icons: resolvedIcons,
-              sortableValueClassNames: classNames?.sortableValue,
-              tagClassNames: classNames?.tag,
-            } as Record<string, unknown>)}
-            id={id}
-            isClearable={false}
-            isDisabled={disabled}
-            isMulti
-            isSearchable={!editingPronounSet}
-            menuIsOpen={editingPronounSet ? true : undefined}
-            name={name}
-            onChange={handleChange}
-            options={
-              dropdownMode === "badges" || !grouped
-                ? flatOptions
-                : groupedOptions
-            }
-            placeholder={placeholder}
-            styles={customStyles}
-            value={selectedOptions}
-          />
-        </SortableContext>
+              ))}
+            </SortableContext>
+
+            <Combobox.Input
+              aria-describedby="pronoun-selector-description"
+              className={clsx("pronoun-select__input", classNames?.input)}
+              disabled={!!editingPronounSet}
+              name={name}
+              placeholder={selectedOptions.length === 0 ? placeholder : undefined}
+            />
+
+            <Combobox.Trigger
+              aria-label="Toggle pronoun options"
+              className={clsx("pronoun-select__trigger", classNames?.trigger)}
+            >
+              <svg
+                aria-hidden="true"
+                fill="none"
+                height="16"
+                stroke="currentColor"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                viewBox="0 0 16 16"
+                width="16"
+              >
+                <path d="M4 6l4 4 4-4" />
+              </svg>
+            </Combobox.Trigger>
+          </Combobox.Control>
+
+          <Combobox.Positioner className="pronoun-select__positioner">
+            <Combobox.Content
+              className={clsx(
+                "pronoun-select__menu",
+                dropdownMode === "badges" && "pronoun-badge-menu",
+                classNames?.menu,
+              )}
+            >
+              {dropdownMode === "badges" ? (
+                // ── Badges mode: flat pill grid ───────────────────────────
+                <>
+                  {!editingPronounSet &&
+                    allOptions.map((opt) => (
+                      <Combobox.Item
+                        key={opt.id ?? opt.label}
+                        className={clsx(
+                          "pronoun-badge-pill",
+                          opt.isCreate && "pronoun-badge-pill--custom",
+                          classNames?.badgePill,
+                          selectedValues.includes(opt.id ?? opt.label) &&
+                            clsx("pronoun-badge-pill--selected", classNames?.badgePillSelected),
+                          opt.isCreate && classNames?.badgePillCustom,
+                        )}
+                        item={opt}
+                        onClick={opt.isCreate ? () => handleBadgeClick(opt) : undefined}
+                      >
+                        <Combobox.ItemIndicator>
+                          <span
+                            className={clsx(
+                              "pronoun-badge-check",
+                              classNames?.badgeCheckIcon,
+                            )}
+                          >
+                            ✓
+                          </span>
+                        </Combobox.ItemIndicator>
+                        <Combobox.ItemText>
+                          {opt.isCreate ? (
+                            <>{resolvedIcons.create} Custom</>
+                          ) : (
+                            opt.label
+                          )}
+                        </Combobox.ItemText>
+                      </Combobox.Item>
+                    ))}
+
+                  {editingPronounSet && (
+                    <div
+                      className={clsx(
+                        "pronoun-detail-editor-container",
+                        classNames?.editorContainer,
+                      )}
+                      onClick={(e) => e.stopPropagation()}
+                      onMouseDown={(e) => e.stopPropagation()}
+                    >
+                      <PronounDetailEditor
+                        classNames={classNames?.editor}
+                        icons={resolvedIcons}
+                        onCancel={handleCancelEdit}
+                        onSave={handleSavePronounSet}
+                        pronounSet={editingPronounSet}
+                        theme={theme}
+                      />
+                    </div>
+                  )}
+                </>
+              ) : (
+                // ── Standard / expanded mode: grouped list ────────────────
+                <>
+                  {displayGroups.map((group) => (
+                    <Combobox.ItemGroup
+                      key={group.label || "all"}
+                      id={group.label || "all"}
+                    >
+                      {group.label && (
+                        <Combobox.ItemGroupLabel
+                          className={clsx(
+                            "pronoun-group-label",
+                            classNames?.option?.groupLabel,
+                          )}
+                        >
+                          <span
+                            className={clsx(
+                              "pronoun-group-label-text",
+                              classNames?.option?.groupLabelText,
+                            )}
+                          >
+                            {group.label}
+                          </span>
+                          <span
+                            className={clsx(
+                              "pronoun-group-count",
+                              classNames?.option?.groupCount,
+                            )}
+                          >
+                            {group.options.length}
+                          </span>
+                        </Combobox.ItemGroupLabel>
+                      )}
+
+                      {group.options.map((opt) => (
+                        <Combobox.Item
+                          key={opt.id ?? opt.label}
+                          className={clsx(
+                            "pronoun-select__option",
+                            opt.isCreate && "pronoun-select__option--create",
+                            classNames?.option?.optionLabel,
+                          )}
+                          item={opt}
+                        >
+                          <Combobox.ItemText>
+                            {formatOptionLabel(
+                              opt,
+                              resolvedIcons,
+                              classNames?.option,
+                              effectiveCompact,
+                            )}
+                          </Combobox.ItemText>
+                          {!opt.isCreate && (
+                            <Combobox.ItemIndicator
+                              className="pronoun-select__item-indicator"
+                            >
+                              ✓
+                            </Combobox.ItemIndicator>
+                          )}
+                        </Combobox.Item>
+                      ))}
+                    </Combobox.ItemGroup>
+                  ))}
+
+                  {editingPronounSet && (
+                    <div
+                      className={clsx(
+                        "pronoun-detail-editor-container",
+                        classNames?.editorContainer,
+                      )}
+                      onClick={(e) => e.stopPropagation()}
+                      onMouseDown={(e) => e.stopPropagation()}
+                    >
+                      <PronounDetailEditor
+                        classNames={classNames?.editor}
+                        icons={resolvedIcons}
+                        onCancel={handleCancelEdit}
+                        onSave={handleSavePronounSet}
+                        pronounSet={editingPronounSet}
+                        theme={theme}
+                      />
+                    </div>
+                  )}
+                </>
+              )}
+            </Combobox.Content>
+          </Combobox.Positioner>
+        </Combobox.Root>
       </DndContext>
 
       <div
@@ -442,7 +627,7 @@ export const PronounSelector: React.FC<PronounSelectorProps> = ({
         space to select, and enter to open the selected option for editing.
       </div>
 
-      <style>{getPronounSelectorStyles(resolvedTheme)}</style>
+      <style>{getPronounSelectorStyles()}</style>
     </div>
   );
 };

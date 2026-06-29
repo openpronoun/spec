@@ -8,7 +8,7 @@ import type { PronounOption, PronounOptionGroup } from "./types";
 
 describe("PronounOptionFormatter", () => {
   describe("formatOptionLabel", () => {
-    test("renders custom pronoun set option", () => {
+    test("renders the create-custom sentinel option", () => {
       const customOption: PronounOption = {
         isCreate: true,
         label: "Create custom pronoun set",
@@ -16,49 +16,34 @@ describe("PronounOptionFormatter", () => {
       };
 
       const { container } = render(
-        <>
-          {
-            formatOptionLabel(
-              customOption,
-              {
-                context: "menu",
-              },
-              defaultIcons,
-            ) as React.ReactElement
-          }
-        </>,
+        <>{formatOptionLabel(customOption, defaultIcons) as React.ReactElement}</>,
       );
 
-      expect(container.querySelector(".pronoun-create-custom")).toBeDefined();
+      expect(container.querySelector(".pronoun-create-custom")).toBeTruthy();
       expect(container.textContent).toContain("Create custom pronoun set");
     });
 
-    test("renders custom create icon when provided", () => {
+    test("renders custom create icon", () => {
       const customOption: PronounOption = {
         isCreate: true,
         label: "Create custom pronoun set",
         value: { type: "custom", display: "" },
       };
 
-      const customIcons = { ...defaultIcons, create: "CUSTOM_CREATE" };
-
       const { container } = render(
         <>
-          {
-            formatOptionLabel(
-              customOption,
-              { context: "menu" },
-              customIcons,
-            ) as React.ReactElement
-          }
+          {formatOptionLabel(
+            customOption,
+            { ...defaultIcons, create: "CUSTOM_CREATE" },
+          ) as React.ReactElement}
         </>,
       );
 
       expect(container.textContent).toContain("CUSTOM_CREATE");
     });
 
-    test("renders specific pronoun set with examples in menu context", () => {
-      const specificOption: PronounOption = {
+    test("renders examples in expanded mode (compact=false)", () => {
+      const option: PronounOption = {
         examples: ["They went to the store.", "I saw them yesterday."],
         label: "they/them",
         value: {
@@ -72,27 +57,17 @@ describe("PronounOptionFormatter", () => {
       };
 
       const { container } = render(
-        <>
-          {
-            formatOptionLabel(
-              specificOption,
-              {
-                context: "menu",
-              },
-              defaultIcons,
-            ) as React.ReactElement
-          }
-        </>,
+        <>{formatOptionLabel(option, defaultIcons, undefined, false) as React.ReactElement}</>,
       );
 
-      expect(container.querySelector(".pronoun-examples")).toBeDefined();
+      expect(container.querySelector(".pronoun-examples")).toBeTruthy();
       expect(container.textContent).toContain("they/them");
       expect(container.textContent).toContain("They went to the store.");
       expect(container.textContent).toContain("I saw them yesterday.");
     });
 
-    test("renders only label in value context", () => {
-      const specificOption: PronounOption = {
+    test("renders only label in compact mode (compact=true)", () => {
+      const option: PronounOption = {
         examples: ["They went to the store.", "I saw them yesterday."],
         label: "they/them",
         value: {
@@ -105,12 +80,28 @@ describe("PronounOptionFormatter", () => {
         },
       };
 
-      const result = formatOptionLabel(
-        specificOption,
-        { context: "value" },
-        defaultIcons,
-      );
+      const result = formatOptionLabel(option, defaultIcons, undefined, true);
       expect(result).toBe("they/them");
+    });
+
+    test("applies classNames to the create option", () => {
+      const customOption: PronounOption = {
+        isCreate: true,
+        label: "Create custom pronoun set",
+        value: { type: "custom", display: "" },
+      };
+
+      const { container } = render(
+        <>
+          {formatOptionLabel(customOption, defaultIcons, {
+            createCustom: "custom-create",
+            createCustomIcon: "custom-icon",
+          }) as React.ReactElement}
+        </>,
+      );
+
+      expect(container.querySelector(".pronoun-create-custom.custom-create")).toBeTruthy();
+      expect(container.querySelector(".pronoun-create-custom-icon.custom-icon")).toBeTruthy();
     });
   });
 
@@ -148,89 +139,41 @@ describe("PronounOptionFormatter", () => {
         <>{formatGroupLabel(group) as React.ReactElement}</>,
       );
 
-      expect(container.querySelector(".pronoun-group-label")).toBeDefined();
+      expect(container.querySelector(".pronoun-group-label")).toBeTruthy();
       expect(container.textContent).toContain("Common Pronouns");
-      expect(container.querySelector(".pronoun-group-count")).toBeDefined();
+      expect(container.querySelector(".pronoun-group-count")).toBeTruthy();
       expect(container.textContent).toContain("2");
     });
 
-    describe("classNames support", () => {
-      test("formatOptionLabel applies classNames to custom option", () => {
-        const customOption: PronounOption = {
-          isCreate: true,
-          label: "Create custom pronoun set",
-          value: { type: "custom", display: "" },
-        };
-
-        const { container } = render(
-          <>
-            {
-              formatOptionLabel(
-                customOption,
-                { context: "menu" },
-                defaultIcons,
-                {
-                  createCustom: "custom-create",
-                  createCustomIcon: "custom-icon",
-                },
-              ) as React.ReactElement
-            }
-          </>,
-        );
-        expect(
-          container.querySelector(".pronoun-create-custom.custom-create"),
-        ).toBeDefined();
-        expect(
-          container.querySelector(".pronoun-create-custom-icon.custom-icon"),
-        ).toBeDefined();
-      });
-
-      test("formatGroupLabel applies classNames", () => {
-        const group: PronounOptionGroup = {
-          label: "Common Pronouns",
-          options: [
-            {
-              label: "he/him",
-              value: {
-                language: "en",
-                objective: "him",
-                possessive_adjective: "his",
-                possessive_pronoun: "his",
-                reflexive: "himself",
-                subjective: "he",
-              },
+    test("applies classNames", () => {
+      const group: PronounOptionGroup = {
+        label: "Common Pronouns",
+        options: [
+          {
+            label: "he/him",
+            value: {
+              language: "en",
+              objective: "him",
+              possessive_adjective: "his",
+              possessive_pronoun: "his",
+              reflexive: "himself",
+              subjective: "he",
             },
-            {
-              label: "she/her",
-              value: {
-                language: "en",
-                objective: "her",
-                possessive_adjective: "her",
-                possessive_pronoun: "hers",
-                reflexive: "herself",
-                subjective: "she",
-              },
-            },
-          ],
-        };
+          },
+        ],
+      };
 
-        const { container } = render(
-          <>
-            {
-              formatGroupLabel(group, {
-                groupCount: "custom-count",
-                groupLabel: "custom-group",
-              }) as React.ReactElement
-            }
-          </>,
-        );
-        expect(
-          container.querySelector(".pronoun-group-label.custom-group"),
-        ).toBeDefined();
-        expect(
-          container.querySelector(".pronoun-group-count.custom-count"),
-        ).toBeDefined();
-      });
+      const { container } = render(
+        <>
+          {formatGroupLabel(group, {
+            groupCount: "custom-count",
+            groupLabel: "custom-group",
+          }) as React.ReactElement}
+        </>,
+      );
+
+      expect(container.querySelector(".pronoun-group-label.custom-group")).toBeTruthy();
+      expect(container.querySelector(".pronoun-group-count.custom-count")).toBeTruthy();
     });
   });
 });

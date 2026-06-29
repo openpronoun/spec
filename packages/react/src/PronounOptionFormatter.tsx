@@ -1,26 +1,24 @@
 import clsx from "clsx";
 import React from "react";
 import type { ReactNode } from "react";
-import type { GroupBase } from "react-select";
 
 import type { PronounOptionFormatterClassNames } from "./classNames";
 import { isStandardSet } from "./pronounUtils";
 import type { PronounIconConfig } from "./theme";
-import type { PronounOption } from "./types";
+import type { PronounOption, PronounOptionGroup } from "./types";
 
 /**
- * Format the option label in the dropdown
+ * Format the option label in the dropdown menu.
+ * In expanded mode (compact=false), standard sets include example sentences.
  */
 export const formatOptionLabel = (
   option: PronounOption,
-  { context }: { context: "menu" | "value" },
   icons: PronounIconConfig,
   classNames?: PronounOptionFormatterClassNames,
   compact?: boolean,
 ): ReactNode => {
   const entry = option.value;
 
-  // "Create custom pronoun set" sentinel — identified by isCreate flag
   if (option.isCreate) {
     return (
       <div className={clsx("pronoun-create-custom", classNames?.createCustom)}>
@@ -36,13 +34,7 @@ export const formatOptionLabel = (
     );
   }
 
-  // Standard sets in expanded mode show example sentences in the menu
-  if (
-    isStandardSet(entry) &&
-    option.examples &&
-    context === "menu" &&
-    !compact
-  ) {
+  if (isStandardSet(entry) && option.examples && !compact) {
     return (
       <div
         className={clsx(
@@ -64,10 +56,10 @@ export const formatOptionLabel = (
 };
 
 /**
- * Format the group label in the dropdown
+ * Format the group label in the dropdown.
  */
 export const formatGroupLabel = (
-  data: GroupBase<PronounOption>,
+  data: PronounOptionGroup,
   classNames?: PronounOptionFormatterClassNames,
 ): ReactNode => (
   <div className={clsx("pronoun-group-label", classNames?.groupLabel)}>

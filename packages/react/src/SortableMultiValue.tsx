@@ -1,19 +1,32 @@
 import { useSortable } from "@dnd-kit/sortable";
 import clsx from "clsx";
 import React from "react";
-import { components } from "react-select";
-import type { GroupBase, MultiValueProps } from "react-select";
 
-import type { SortableMultiValueClassNames } from "./classNames";
+import type { PronounTagClassNames, SortableMultiValueClassNames } from "./classNames";
+import type { PronounSet } from "./pronounUtils";
+import type { PronounIconConfig } from "./theme";
 import type { PronounOption } from "./types";
+import { PronounTag } from "./PronounTag";
 
-/**
- * A sortable wrapper for the MultiValue component from react-select
- * Enables drag-and-drop functionality for pronoun tags
- */
-export const SortableMultiValue = (
-  props: MultiValueProps<PronounOption, true, GroupBase<PronounOption>>,
-) => {
+export interface SortableMultiValueProps {
+  classNames?: SortableMultiValueClassNames;
+  icons: PronounIconConfig;
+  id: string;
+  onEdit?: (pronounSet: PronounSet) => void;
+  onRemove?: (id: string) => void;
+  option: PronounOption;
+  tagClassNames?: PronounTagClassNames;
+}
+
+export const SortableMultiValue: React.FC<SortableMultiValueProps> = ({
+  classNames,
+  icons,
+  id,
+  onEdit,
+  onRemove,
+  option,
+  tagClassNames,
+}) => {
   const {
     attributes,
     isDragging,
@@ -22,15 +35,9 @@ export const SortableMultiValue = (
     transform,
     transition,
   } = useSortable({
-    data: props.data,
-    id: props.data.id || "",
+    data: option,
+    id,
   });
-
-  const sortableClassNames = (
-    props.selectProps as {
-      sortableValueClassNames?: SortableMultiValueClassNames;
-    }
-  ).sortableValueClassNames;
 
   const style = {
     transform: transform
@@ -45,14 +52,21 @@ export const SortableMultiValue = (
       className={clsx(
         "pronoun-multi-value",
         { "is-dragging": isDragging },
-        sortableClassNames?.root,
+        classNames?.root,
       )}
       ref={setNodeRef}
       style={style}
       {...attributes}
       {...listeners}
     >
-      <components.MultiValue {...props} />
+      <PronounTag
+        classNames={tagClassNames}
+        icons={icons}
+        id={id}
+        onEdit={onEdit}
+        onRemove={onRemove}
+        option={option}
+      />
     </div>
   );
 };

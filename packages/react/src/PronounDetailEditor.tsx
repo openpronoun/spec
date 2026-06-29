@@ -12,7 +12,7 @@ import {
   PrivacyLevel,
 } from "./pronounUtils";
 import type { PronounSet } from "./pronounUtils";
-import { getPronounDetailEditorStyles } from "./styles";
+import { getPronounCSSVars, getPronounDetailEditorStyles } from "./styles";
 import { defaultTheme, mergeIcons, mergeTheme } from "./theme";
 import type { PronounIconConfig, PronounTheme } from "./theme";
 
@@ -182,6 +182,7 @@ export const PronounDetailEditor: React.FC<PronounDetailEditorProps> = ({
       onKeyDown={handleKeyDown}
       ref={dialogRef}
       role="dialog"
+      style={getPronounCSSVars(mergedTheme)}
     >
       <EditorHeader
         classNames={classNames?.header}
@@ -311,7 +312,7 @@ export const PronounDetailEditor: React.FC<PronounDetailEditorProps> = ({
         pronounSet={editedSet as unknown as PronounSet}
       />
 
-      <style>{getPronounDetailEditorStyles(mergedTheme)}</style>
+      <style>{getPronounDetailEditorStyles()}</style>
     </div>
   );
 };

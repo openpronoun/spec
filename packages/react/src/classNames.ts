@@ -163,10 +163,16 @@ export interface PronounSelectorClassNames {
   badgePillCustom?: string;
   /** A selected badge pill (badges dropdown mode) */
   badgePillSelected?: string;
+  /** The Combobox.Control element (tags + input wrapper) */
+  control?: string;
   /** Class names forwarded to the PronounDetailEditor child */
   editor?: PronounDetailEditorClassNames;
   /** The editor container wrapper */
   editorContainer?: string;
+  /** The Combobox.Input element (the search field) */
+  input?: string;
+  /** The Combobox.Content element (the dropdown panel) */
+  menu?: string;
   /** Class names forwarded to PronounOptionFormatter children */
   option?: PronounOptionFormatterClassNames;
   /** The original text banner above the dropdown */
@@ -179,6 +185,8 @@ export interface PronounSelectorClassNames {
   sortableValue?: SortableMultiValueClassNames;
   /** Class names forwarded to PronounTag children */
   tag?: PronounTagClassNames;
+  /** The Combobox.Trigger element (the chevron button) */
+  trigger?: string;
 }
 
 // ---------------------------------------------------------------------------
