@@ -1,0 +1,56 @@
+{
+  "name": "@openpronoun/preact",
+  "version": "0.0.0",
+  "description": "PLACEHOLDER — owned by maintainer.",
+  "license": "MIT",
+  "type": "module",
+  "sideEffects": false,
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
+  "files": [
+    "dist"
+  ],
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    }
+  },
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "test": "vitest run",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "check:exports": "publint && attw --pack ."
+  },
+  "devDependencies": {
+    "@arethetypeswrong/cli": "latest",
+    "eslint": "latest",
+    "typescript-eslint": "latest",
+    "@eslint/js": "latest",
+    "publint": "latest",
+    "tsup": "latest",
+    "typescript": "latest",
+    "vitest": "latest",
+    "react": "latest",
+    "react-dom": "latest"
+  },
+  "peerDependencies": {
+    "react": ">=18"
+  },
+  "dependencies": {
+    "@openpronoun/core": "*"
+  }
+}
