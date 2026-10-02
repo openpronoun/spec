@@ -20,6 +20,7 @@ hero:
 ---
 
 import Explainer from "../../components/Explainer.astro";
+import HomeDemo from "../../components/examples/react/HomeDemo.tsx";
 
 ## Why a standard?
 
@@ -76,6 +77,19 @@ some people. See [Display & stringification](/specification/display/).
 Don't want to build the UI yourself? Drop in a component, set it, and forget
 it. Each one looks good out of the box, takes on your product's look when you
 want it to, and follows this spec without you having to read it.
+
+Try it. Open the list to add a set, remove one, drag to reorder, or choose
+**Custom** to create your own:
+
+<div class="op-demo-frame not-content">
+  <HomeDemo client:visible />
+</div>
+<p class="op-demo-caption">
+  This is the real <code>PronounSelector</code> in badge mode. It's styled only with theme tokens to
+  match these docs, and follows your light or dark setting.
+</p>
+
+Here's all it takes in your app:
 
 ```tsx
 import { useState } from "react";
