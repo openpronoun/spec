@@ -48,7 +48,7 @@
     "eslint": "latest",
     "publint": "latest",
     "tsup": "latest",
-    "typescript": "latest",
+    "typescript": "^6.0.3",
     "typescript-eslint": "latest",
     "vitest": "latest",
     "zod": "^4"

@@ -33,7 +33,7 @@
     "react-dom": "latest",
     "solid-js": "latest",
     "svelte": "latest",
-    "typescript": "latest",
+    "typescript": "^6.0.3",
     "vue": "latest"
   }
 }

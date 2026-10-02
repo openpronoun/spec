@@ -248,7 +248,7 @@ export const PronounSelector: React.FC<PronounSelectorProps> = ({
         value: entry,
       };
     });
-  }, [value, allOptions]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [value, allOptions]);
 
   // selectedValues must use the same IDs as collection.itemToValue so Ark UI can
   // correctly track which items are selected (distinct from dnd-kit's index IDs).

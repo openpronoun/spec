@@ -1,3 +1,4 @@
+/** @jsxImportSource solid-js */
 import { createSignal, createMemo } from "solid-js";
 import { parse, format } from "@openpronoun/core";
 

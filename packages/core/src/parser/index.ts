@@ -165,7 +165,6 @@ export function parse(
     if (!seg) continue;
 
     let workSeg = seg;
-    let workLc = seg.toLowerCase();
 
     // Extract parenthetical or bracketed context: "she/her (at work)" or "[at work]".
     let context: string | undefined;
@@ -175,15 +174,12 @@ export function parse(
     if (parenMatch) {
       context = parenMatch[1]!.trim() || undefined;
       workSeg = workSeg.slice(0, parenMatch.index!).trim();
-      workLc = workSeg.toLowerCase();
     }
 
-    // Strip filler phrases — apply FILLER_PATTERNS to the original-case workSeg
-    // (all patterns have /i), then re-derive workLc.
-    for (const pattern of FILLER_PATTERNS) {
-      workSeg = workSeg.replace(pattern, "").trim();
-    }
-    workLc = workSeg.toLowerCase();
+    // Strip filler phrases from the original-case workSeg (all patterns have
+    // /i), then derive workLc.
+    workSeg = stripFiller(workSeg);
+    let workLc = workSeg.toLowerCase();
 
     if (!workLc) continue;
 
