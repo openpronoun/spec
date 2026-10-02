@@ -1,6 +1,6 @@
 {
   "name": "@openpronoun/react",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "React components and hooks for collecting, displaying, and managing pronouns per the OpenPronoun specification.",
   "keywords": [
     "pronouns",
