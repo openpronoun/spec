@@ -1,68 +1,181 @@
-# OpenPronoun
+<div align="center">
 
-> A specification for representing, exchanging, parsing, and displaying personal pronouns in software systems.
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset=".github/assets/logo-dark.svg">
+  <img alt="OpenPronoun" src=".github/assets/logo-light.svg" width="364">
+</picture>
 
-This is the monorepo for the `@openpronoun/*` package ecosystem.
+### An open technical standard for getting pronouns right in software.
+
+Model them, parse them, store them, and display them the way each person asked — consistently, across every system that touches their name.
+
+[![Read the docs](https://img.shields.io/badge/docs-openpronoun.github.io%2Fspec-a400c0)](https://openpronoun.github.io/spec/)
+[![Spec status: Draft 0.1](https://img.shields.io/badge/spec-draft%200.1-e3b6ed)](https://openpronoun.github.io/spec/specification/conformance/)
+[![npm: @openpronoun/core](https://img.shields.io/npm/v/@openpronoun/core?label=%40openpronoun%2Fcore&color=614e78)](https://www.npmjs.com/package/@openpronoun/core)
+[![License: MIT](https://img.shields.io/badge/license-MIT-412e55)](./LICENSE)
+
+**[Documentation](https://openpronoun.github.io/spec/)** ·
+**[Specification](https://openpronoun.github.io/spec/specification/conformance/)** ·
+**[Usage examples](https://openpronoun.github.io/spec/usage/)** ·
+**[Packages](#packages)** ·
+**[Contributing](#contributing)**
+
+</div>
+
+---
+
+## Why a standard?
+
+Pronouns show up everywhere a person's name does: profiles, patient charts, HR systems, class rosters, chat apps, the emails your product sends on someone's behalf. Today almost every team solves this from scratch, and the usual answers fall short:
+
+- **Free-text fields** are flexible, but software can't use them. You can't safely write "_They_ updated _their_ settings" from a string someone typed.
+- **Short dropdowns** leave people out. "He / She / They / Other" tells everyone whose pronouns aren't listed that they're the exception.
+- **Nothing interoperates.** Pronouns entered in one system don't survive the trip to the next.
+
+Getting this wrong isn't cosmetic. Misgendering erodes trust, and in settings like healthcare it can discourage people from seeking care at all. OpenPronoun gives teams a shared, well-tested answer so they don't have to invent one — and so the people using their software are addressed correctly everywhere.
+
+## How it works
+
+### 1. Parse whatever people actually type
+
+<p align="center">
+  <img src=".github/assets/openpronoun-parse.webp" alt="Animation: the inputs 'They/Them', 'they / them / theirs' and 'them/they' drift into a pair of curly braces and come out as one structured set with five labelled forms — they (subjective), them (objective), their (possessive adjective), theirs (possessive pronoun), themselves (reflexive)." width="100%">
+</p>
+
+Different spellings, spacing, capitalization, and word order all normalize to one canonical **pronoun set** with every grammatical form filled in. Multiple sets (`she/her, they/them`), neopronouns (`xe/xem`, `fae/faer`), and preferences like _any pronouns_, _no pronouns — use my name_, or _ask me_ are first-class, not edge cases. → [Parsing & normalization](https://openpronoun.github.io/spec/specification/parsing/)
+
+### 2. Store once, display everywhere
+
+<p align="center">
+  <img src=".github/assets/openpronoun-display.webp" alt="Animation: a structured record in curly braces sends data along dotted lines to three surfaces — a profile card showing 'They/Them, She/Her', a generated sentence reading 'They shared their notes.', and a public view showing only 'They/Them'." width="100%">
+</p>
+
+Because every form is stored, any part of your product can render pronouns consistently: a short label beside a name, a grammatically correct generated sentence, or a public view that hides sets the person only shares with some audiences. → [Display & stringification](https://openpronoun.github.io/spec/specification/display/)
+
+## Quick start
+
+```sh
+npm install @openpronoun/core
+```
+
+```ts
+import { parse, format } from "@openpronoun/core";
+
+const pref = parse("they/them, she/her");
+// [{ subjective: "they", objective: "them", possessive_adjective: "their",
+//    possessive_pronoun: "theirs", reflexive: "themselves" },
+//  { subjective: "she", ... }]
+
+format(pref!); // "They/Them, She/Her"
+format(pref!, { form: "expanded" }); // "They/Them/Theirs, She/Her/Hers"
+
+parse("any pronouns"); // [{ type: "any" }]
+parse("no pronouns"); // [{ type: "none" }]  → use their name
+parse("fae/faer"); // known neopronoun set, all five forms
+```
+
+More in the [usage guide](https://openpronoun.github.io/spec/usage/), including validation, privacy filtering, and live examples for React, Vue, Svelte, Solid, Preact, Alpine, and vanilla JS.
+
+## What the standard covers
+
+| Area                                                                                                                                                                                    | What it defines                                                                                                                                                                                    |
+| --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **[Data model](https://openpronoun.github.io/spec/specification/data-model/)**                                                                                                          | `PronounSet` and `PronounPreference`: five English forms, multiple sets with optional ranking, `any` / `none` / `ask` / `unspecified`, custom entries, exclusions, context, privacy, and language. |
+| **[Parsing](https://openpronoun.github.io/spec/specification/parsing/)**                                                                                                                | Rules for turning real-world input into the model: separators, scrambled order, concatenated sets, special phrases, and freeform capture.                                                          |
+| **[Display](https://openpronoun.github.io/spec/specification/display/)**                                                                                                                | Canonical short and expanded strings, multiple sets, context, and capitalization.                                                                                                                  |
+| **[Conformance](https://openpronoun.github.io/spec/specification/conformance/)**                                                                                                        | Normative requirements in RFC 2119 language, a published JSON Schema, and shared test fixtures.                                                                                                    |
+| **[UX & accessibility](https://openpronoun.github.io/spec/guidance/ux-accessibility/)**                                                                                                 | How to ask for pronouns respectfully and show them clearly.                                                                                                                                        |
+| **[Internationalization](https://openpronoun.github.io/spec/guidance/internationalization/)** · **[Security & privacy](https://openpronoun.github.io/spec/guidance/security-privacy/)** | Language tagging, localization, and handling pronoun data with care.                                                                                                                               |
+
+The model aligns with emerging healthcare work such as HL7's Gender Harmony pronoun value sets, while staying general-purpose. See [Overview](https://openpronoun.github.io/spec/introduction/overview/) and [Motivation](https://openpronoun.github.io/spec/introduction/motivation/) for the background.
+
+## Designed around the people being described
+
+The spec bakes in a few commitments, so every implementation inherits them:
+
+- **No "Other" bucket.** Anything that doesn't match a known set is kept exactly as the person wrote it, never rejected or mangled.
+- **More than one set is normal.** `she/they`, `he/they`, and ranked or unranked combinations are part of the core model.
+- **Neopronouns are real pronouns.** `xe/xem`, `ze/zir`, `fae/faer`, and others parse into full sets like any other.
+- **Different answers mean different things.** _Any pronouns_, _no pronouns (use my name)_, _ask me_, and _prefer not to say_ are distinct, and none of them is treated as a blank.
+- **"Not these" is respected.** A set someone has excluded is never shown or used.
+- **Context and privacy travel with the data.** "he/him (at work)" keeps its note, and a set shared only with some audiences stays out of public views.
+- **Asking is optional.** The UX guidance treats pronoun fields as optional, explained, and under the person's control.
 
 ## Packages
 
-| Package | Description | Status |
-|---|---|---|
-| [`@openpronoun/core`](./packages/core) | Core specification types and utilities | Placeholder |
-| [`@openpronoun/react`](./packages/react) | React bindings for OpenPronoun | Placeholder |
+| Package                                              | What it's for                                                                                                    |
+| ---------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| [`@openpronoun/core`](./packages/core)               | Reference TypeScript implementation: `parse`, `format`, `validate`, `filterByAudience`, and the pronoun lexicon. |
+| [`@openpronoun/react`](./packages/react)             | React components and hooks for collecting and displaying pronouns per the spec.                                  |
+| [`@openpronoun/schema`](./packages/schema)           | Canonical JSON Schema for the data model.                                                                        |
+| [`@openpronoun/zod`](./packages/zod)                 | Zod schemas and inferred TypeScript types mirroring the JSON Schema.                                             |
+| [`@openpronoun/conformance`](./packages/conformance) | Language-agnostic parsing and formatting fixtures any implementation can test against.                           |
 
-## Documentation
+Writing a port in another language? Validate against [`@openpronoun/schema`](./packages/schema) and run the [`@openpronoun/conformance`](./packages/conformance) fixtures, and you're testing against the same expectations as the reference library.
 
-The documentation site is built with [Astro](https://astro.build) + [Starlight](https://starlight.astro.build) and deploys to GitHub Pages.
+## Show you conform
 
-```bash
-npm run docs:dev      # local dev server
-npm run docs:build    # production build
-npm run docs:preview  # preview production build
+Implementations that meet the [conformance requirements](https://openpronoun.github.io/spec/specification/conformance/) may display the badge:
+
+[![Pronoun Standard Compliant](https://img.shields.io/badge/pronouns-standard%20compliant-blueviolet)](https://openpronoun.github.io/spec/specification/conformance/)
+
+```md
+![Pronoun Standard Compliant](https://img.shields.io/badge/pronouns-standard%20compliant-blueviolet)
 ```
 
-## Development
+## Contributing
+
+OpenPronoun is a draft, and it gets better with more voices. Contributions are welcome from engineers, designers, linguists, clinicians, and anyone with lived experience of being misnamed by software.
+
+- **Your pronouns didn't parse the way they should?** That's a gap in the lexicon, not a problem with you. [Open an issue](https://github.com/openpronoun/spec/issues/new) with what you typed and what you expected.
+- **Spec feedback** — ambiguities, missing cases, internationalization — is welcome as issues or pull requests against the [docs](./docs/src/content/docs).
+- **Code changes** to published packages need a [Changeset](https://github.com/changesets/changesets) (`npm run changeset`).
+
+<details>
+<summary><strong>Development setup</strong></summary>
+
+Requires Node 24+. This is an npm workspaces monorepo built with [Turborepo](https://turbo.build) and versioned with [Changesets](https://github.com/changesets/changesets).
 
 ```bash
-# Install all dependencies (root + all workspaces)
-npm install
-
-# Build all packages and docs (in dependency order via Turborepo)
-npm run build
-
-# Run tests
-npm run test
-
-# Lint
-npm run lint
-
-# Type-check
-npm run typecheck
-
-# Verify package exports (publint + attw)
-npm run check:exports
-
-# Format code
-npm run format
+npm install            # install root + all workspaces
+npm run build          # build packages, then docs
+npm run test           # run tests
+npm run lint           # lint
+npm run typecheck      # type-check
+npm run check:exports  # verify package exports (publint + attw)
+npm run format         # format with Prettier
 ```
 
-## Creating a new package
+**Docs site** ([Astro](https://astro.build) + [Starlight](https://starlight.astro.build), deployed to GitHub Pages):
+
+```bash
+npm run docs:dev       # local dev server
+npm run docs:build     # production build
+npm run docs:preview   # preview the production build
+```
+
+**New package:**
 
 ```bash
 npm run new -- <name>           # standard package
-npm run new -- <name> --react   # React adapter package (adds peer deps + core dep)
+npm run new -- <name> --react   # React adapter (adds peer deps + core dep)
 ```
 
-## Versioning and publishing
-
-This monorepo uses [Changesets](https://github.com/changesets/changesets) for versioning and publishing.
+**Release:**
 
 ```bash
-npm run changeset    # create a changeset
-npm run version      # apply changesets and bump versions
-npm run release      # build and publish to npm
+npm run changeset      # describe your change
+npm run version        # apply changesets and bump versions
+npm run release        # build and publish to npm
 ```
+
+</details>
 
 ## License
 
-[MIT](./LICENSE)
+The reference implementations are [MIT licensed](./LICENSE).
+
+<div align="center">
+<br>
+<sub>Built so that software says it right the first time — for everyone.</sub>
+</div>
