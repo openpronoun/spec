@@ -280,6 +280,7 @@ function SelectionTab({
                 color: mode === m ? "#fff" : "#4a5568",
                 cursor: "pointer",
                 fontSize: "12px",
+                margin: 0,
                 padding: "3px 10px",
               }}
               type="button"

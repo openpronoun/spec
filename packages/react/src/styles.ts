@@ -268,6 +268,7 @@ export const getPronounSelectorStyles = (_theme?: PronounTheme) => `
     align-items: center;
     justify-content: space-between;
     gap: 12px;
+    margin: 0;
     padding: 7px 8px;
     border-radius: var(--ps-item-radius);
     cursor: pointer;
@@ -432,6 +433,8 @@ export const getPronounSelectorStyles = (_theme?: PronounTheme) => `
   .pronoun-badge-menu {
     display: flex;
     flex-wrap: wrap;
+    align-content: flex-start;
+    align-items: center;
     gap: 6px;
     padding: 10px;
     max-height: none;
@@ -443,6 +446,7 @@ export const getPronounSelectorStyles = (_theme?: PronounTheme) => `
     gap: 5px;
     height: 30px;
     box-sizing: border-box;
+    margin: 0;
     padding: 0 12px;
     background-color: var(--ps-bg);
     border: 1px solid var(--ps-border);
@@ -481,6 +485,17 @@ export const getPronounSelectorStyles = (_theme?: PronounTheme) => `
 
   .pronoun-badge-pill--custom[data-highlighted] {
     background-color: var(--ps-tint-1);
+  }
+
+  .pronoun-badge-pill [data-part="item-text"] {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .pronoun-badge-pill svg {
+    display: block;
+    flex-shrink: 0;
   }
 
   .pronoun-badge-check {
