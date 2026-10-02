@@ -73,9 +73,19 @@ export function getPronounCSSVars(theme: PronounTheme): React.CSSProperties {
  */
 export const getPronounSelectorStyles = (_theme?: PronounTheme) => `
   .pronoun-selector {
+    --ps-tint-1: color-mix(in srgb, var(--ps-primary) 8%, var(--ps-bg));
+    --ps-tint-2: color-mix(in srgb, var(--ps-primary) 14%, var(--ps-bg));
+    --ps-tint-border: color-mix(in srgb, var(--ps-primary) 28%, var(--ps-bg));
+    --ps-hover-bg: color-mix(in srgb, var(--ps-secondary) 55%, var(--ps-bg));
+    --ps-shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.05);
+    --ps-shadow-lg: 0 12px 32px -8px rgba(15, 23, 42, 0.2), 0 2px 6px -2px rgba(15, 23, 42, 0.08);
+    --ps-item-radius: max(calc(var(--ps-radius) - 2px), 4px);
+
     width: 100%;
     position: relative;
     font-family: var(--ps-font-family);
+    font-size: var(--ps-font-size-md);
+    line-height: 1.4;
     color: var(--ps-text);
   }
 
@@ -83,21 +93,22 @@ export const getPronounSelectorStyles = (_theme?: PronounTheme) => `
 
   .pronoun-select__control {
     display: flex;
-    flex-wrap: wrap;
     align-items: center;
-    gap: 2px;
+    gap: 4px;
     min-height: var(--ps-control-height);
-    padding: 2px 6px;
+    padding: 3px 4px;
     background-color: var(--ps-bg);
     border: 1px solid var(--ps-border);
     border-radius: var(--ps-radius);
+    box-shadow: var(--ps-shadow-sm);
     cursor: text;
     transition: border-color 0.15s ease, box-shadow 0.15s ease;
     font-family: var(--ps-font-family);
+    box-sizing: border-box;
   }
 
   .pronoun-select__control:hover {
-    border-color: var(--ps-primary-hover);
+    border-color: color-mix(in srgb, var(--ps-primary-hover) 55%, var(--ps-border));
   }
 
   .pronoun-select__control:focus-within {
@@ -105,18 +116,35 @@ export const getPronounSelectorStyles = (_theme?: PronounTheme) => `
     box-shadow: var(--ps-focus-ring);
   }
 
+  .pronoun-select__control[data-disabled] {
+    cursor: not-allowed;
+    opacity: 0.6;
+    border-color: var(--ps-border);
+    box-shadow: none;
+  }
+
+  .pronoun-select__values {
+    display: flex;
+    flex: 1;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px;
+    min-width: 0;
+  }
+
   /* ── Input ────────────────────────────────────────────────────── */
 
   .pronoun-select__input {
     flex: 1;
-    min-width: 80px;
+    min-width: 6ch;
+    height: 28px;
     border: none;
     outline: none;
     background: transparent;
     color: var(--ps-text);
+    font: inherit;
     font-size: var(--ps-font-size-md);
-    padding: 4px 2px;
-    font-family: var(--ps-font-family);
+    padding: 0 6px;
   }
 
   .pronoun-select__input::placeholder {
@@ -129,18 +157,31 @@ export const getPronounSelectorStyles = (_theme?: PronounTheme) => `
     display: flex;
     align-items: center;
     justify-content: center;
+    align-self: flex-start;
+    width: 28px;
+    height: 28px;
+    margin-top: max(0px, calc((var(--ps-control-height) - 2px - 6px - 28px) / 2));
     background: none;
     border: none;
-    color: var(--ps-disabled);
+    color: var(--ps-helper-text);
     cursor: pointer;
-    padding: 4px;
-    border-radius: var(--ps-radius);
-    transition: color 0.15s ease;
+    padding: 0;
+    border-radius: var(--ps-item-radius);
+    transition: color 0.15s ease, background-color 0.15s ease;
     flex-shrink: 0;
+  }
+
+  .pronoun-select__trigger svg {
+    transition: transform 0.2s ease;
+  }
+
+  .pronoun-select__trigger[data-state="open"] svg {
+    transform: rotate(180deg);
   }
 
   .pronoun-select__trigger:hover {
     color: var(--ps-text);
+    background-color: var(--ps-hover-bg);
   }
 
   .pronoun-select__trigger:focus-visible {
@@ -156,68 +197,102 @@ export const getPronounSelectorStyles = (_theme?: PronounTheme) => `
   }
 
   .pronoun-select__menu {
+    box-sizing: border-box;
     background-color: var(--ps-bg);
     border: 1px solid var(--ps-border);
-    border-radius: var(--ps-radius);
-    box-shadow: 0 8px 16px -2px rgba(0, 0, 0, 0.1), 0 2px 6px -1px rgba(0, 0, 0, 0.06);
+    border-radius: calc(var(--ps-radius) + 2px);
+    box-shadow: var(--ps-shadow-lg);
     overflow-y: auto;
-    max-height: 320px;
-    padding: 4px 0;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+    max-height: 340px;
+    padding: 6px;
     position: relative;
     font-family: var(--ps-font-family);
+    outline: none;
   }
 
-  /* ── Group labels ─────────────────────────────────────────────── */
+  .pronoun-select__menu[data-state="open"] {
+    animation: ps-menu-in 0.14s ease-out;
+  }
+
+  @keyframes ps-menu-in {
+    from { opacity: 0; transform: translateY(-4px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .pronoun-select__menu[data-state="open"] { animation: none; }
+    .pronoun-select__trigger svg { transition: none; }
+  }
+
+  /* ── Groups ───────────────────────────────────────────────────── */
+
+  .pronoun-select__group + .pronoun-select__group {
+    margin-top: 6px;
+    padding-top: 6px;
+    border-top: 1px solid var(--ps-border);
+  }
 
   .pronoun-group-label {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 8px 12px 6px;
+    padding: 6px 8px 4px;
     color: var(--ps-label);
-    font-weight: 700;
-    font-size: 0.7rem;
-    letter-spacing: 0.08em;
+    font-weight: 600;
+    font-size: 0.6875rem;
+    letter-spacing: 0.06em;
     text-transform: uppercase;
-    border-bottom: 1px solid var(--ps-border);
-    margin-bottom: 2px;
   }
 
   .pronoun-group-count {
-    background-color: var(--ps-secondary);
+    min-width: 18px;
+    padding: 0 6px;
     border-radius: 9999px;
-    color: var(--ps-label);
-    font-size: 0.7rem;
-    font-weight: 700;
+    background-color: var(--ps-hover-bg);
+    color: var(--ps-helper-text);
+    font-size: 0.6875rem;
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
     letter-spacing: 0;
-    padding: 1px 6px;
+    line-height: 18px;
+    text-align: center;
+    box-sizing: border-box;
   }
 
   /* ── Options ──────────────────────────────────────────────────── */
 
   .pronoun-select__option {
-    padding: 6px 12px;
-    cursor: default;
-    color: var(--ps-text);
-    font-size: var(--ps-font-size-md);
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 8px;
+    gap: 12px;
+    padding: 7px 8px;
+    border-radius: var(--ps-item-radius);
+    cursor: pointer;
+    color: var(--ps-text);
+    font-size: var(--ps-font-size-md);
     font-family: var(--ps-font-family);
+    transition: background-color 0.08s ease;
   }
 
   .pronoun-select__option[data-highlighted] {
-    background-color: var(--ps-secondary);
+    background-color: var(--ps-hover-bg);
   }
 
-  .pronoun-select__option[data-selected] {
-    background-color: var(--ps-primary-dim-1);
-    color: var(--ps-primary);
+  .pronoun-select__option[data-state="checked"] {
+    background-color: var(--ps-tint-1);
+    font-weight: 500;
   }
 
-  .pronoun-select__option[data-highlighted][data-selected] {
-    background-color: var(--ps-primary-dim-2);
+  .pronoun-select__option[data-highlighted][data-state="checked"] {
+    background-color: var(--ps-tint-2);
+  }
+
+  .pronoun-select__option[data-disabled] {
+    cursor: not-allowed;
+    opacity: 0.5;
   }
 
   .pronoun-select__option--create {
@@ -225,15 +300,29 @@ export const getPronounSelectorStyles = (_theme?: PronounTheme) => `
     font-weight: 500;
   }
 
+  .pronoun-select__option--create[data-highlighted] {
+    background-color: var(--ps-tint-1);
+  }
+
+  .pronoun-select__item-indicator[hidden],
+  .pronoun-select__menu [data-part="item-indicator"][hidden] {
+    display: none;
+  }
+
   .pronoun-select__item-indicator {
-    font-size: 0.75rem;
+    display: flex;
     color: var(--ps-primary);
     flex-shrink: 0;
   }
 
+  .pronoun-option-label {
+    font-weight: inherit;
+  }
+
   .pronoun-examples {
-    margin-top: 2px;
+    margin-top: 1px;
     font-size: 0.75rem;
+    font-weight: 400;
     line-height: 1.4;
     color: var(--ps-helper-text);
     overflow: hidden;
@@ -241,63 +330,81 @@ export const getPronounSelectorStyles = (_theme?: PronounTheme) => `
     white-space: nowrap;
   }
 
+  .pronoun-option-with-examples {
+    min-width: 0;
+  }
+
   /* ── Tags (selected values in the control) ────────────────────── */
+
+  .pronoun-multi-value {
+    transition: transform 0.2s, box-shadow 0.2s;
+    margin: 0;
+    border-radius: var(--ps-badge-radius);
+  }
+
+  .pronoun-multi-value.is-dragging {
+    z-index: 1;
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.18);
+  }
+
+  .pronoun-tag-container {
+    display: inline-flex;
+    align-items: center;
+    gap: 1px;
+    height: 26px;
+    box-sizing: border-box;
+    padding: 0 3px 0 6px;
+    margin: 0;
+    background-color: var(--ps-tint-1);
+    border: 1px solid var(--ps-tint-border);
+    border-radius: var(--ps-badge-radius);
+    color: var(--ps-text);
+    font-size: var(--ps-font-size-md);
+    font-weight: 500;
+    white-space: nowrap;
+  }
 
   .pronoun-tag-label {
     display: flex;
     align-items: center;
     cursor: grab;
-    gap: 4px;
+    gap: 5px;
+    padding-right: 2px;
     line-height: 1;
-  }
-
-  .pronoun-tag-container {
-    display: flex;
-    align-items: center;
-    flex-direction: row;
-    background-color: var(--ps-secondary);
-    border: 1px solid var(--ps-border);
-    border-radius: 9999px;
-    padding: 3px 4px 3px 8px;
-    margin: 2px 4px 2px 0;
-    gap: 2px;
   }
 
   .pronoun-drag-handle {
     display: flex;
     align-items: center;
     flex-shrink: 0;
-    color: var(--ps-disabled);
+    color: var(--ps-helper-text);
+    opacity: 0.45;
     cursor: grab;
+    transition: opacity 0.15s ease;
   }
 
-  .pronoun-multi-value {
-    transition: transform 0.2s, box-shadow 0.2s;
-    margin-top: 0;
-  }
-
-  .pronoun-multi-value.is-dragging {
-    z-index: 1;
-    transform: scale(1.05);
-    box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+  .pronoun-tag-container:hover .pronoun-drag-handle,
+  .pronoun-multi-value.is-dragging .pronoun-drag-handle {
+    opacity: 1;
   }
 
   .pronoun-tag-actions {
     display: flex;
     align-items: center;
-    gap: 2px;
+    gap: 1px;
   }
 
-  .pronoun-tag-edit {
+  .pronoun-tag-edit,
+  .pronoun-tag-remove {
     background: none;
     border: none;
-    border-radius: var(--ps-radius);
-    color: var(--ps-disabled);
+    border-radius: 9999px;
+    color: var(--ps-helper-text);
     cursor: pointer;
-    font-size: 0.75rem;
-    height: 22px;
-    width: 22px;
+    height: 20px;
+    width: 20px;
     padding: 0;
+    margin: 0;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -306,36 +413,15 @@ export const getPronounSelectorStyles = (_theme?: PronounTheme) => `
 
   .pronoun-tag-edit:hover {
     color: var(--ps-primary);
-    background-color: var(--ps-secondary-hover);
-  }
-
-  .pronoun-tag-edit:focus-visible {
-    outline: none;
-    box-shadow: var(--ps-focus-ring);
-  }
-
-  .pronoun-tag-remove {
-    background: none;
-    border: none;
-    border-radius: var(--ps-radius);
-    color: var(--ps-disabled);
-    cursor: pointer;
-    font-size: 0.75rem;
-    height: 22px;
-    width: 22px;
-    padding: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: color 0.15s ease, background-color 0.15s ease;
-    margin-top: 0;
+    background-color: var(--ps-tint-2);
   }
 
   .pronoun-tag-remove:hover {
     color: var(--ps-error);
-    background-color: var(--ps-secondary-hover);
+    background-color: color-mix(in srgb, var(--ps-error) 12%, var(--ps-bg));
   }
 
+  .pronoun-tag-edit:focus-visible,
   .pronoun-tag-remove:focus-visible {
     outline: none;
     box-shadow: var(--ps-focus-ring);
@@ -346,51 +432,69 @@ export const getPronounSelectorStyles = (_theme?: PronounTheme) => `
   .pronoun-badge-menu {
     display: flex;
     flex-wrap: wrap;
-    gap: 8px;
-    padding: 8px 10px;
+    gap: 6px;
+    padding: 10px;
     max-height: none;
   }
 
   .pronoun-badge-pill {
     display: inline-flex;
     align-items: center;
-    gap: 6px;
-    background-color: var(--ps-secondary);
+    gap: 5px;
+    height: 30px;
+    box-sizing: border-box;
+    padding: 0 12px;
+    background-color: var(--ps-bg);
     border: 1px solid var(--ps-border);
     border-radius: var(--ps-badge-radius);
     color: var(--ps-text);
     cursor: pointer;
-    font-size: var(--ps-font-size-sm);
+    font-size: var(--ps-font-size-md);
     font-weight: 500;
-    padding: 4px 10px;
-    transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+    white-space: nowrap;
+    transition: background-color 0.12s ease, border-color 0.12s ease, color 0.12s ease;
   }
 
-  .pronoun-badge-pill[data-selected],
-  .pronoun-badge-pill[data-highlighted][data-selected] {
-    background-color: var(--ps-primary);
-    border-color: var(--ps-primary);
-    color: var(--ps-bg);
+  .pronoun-badge-pill[data-highlighted]:not([data-state="checked"]) {
+    background-color: var(--ps-hover-bg);
+    border-color: color-mix(in srgb, var(--ps-primary) 35%, var(--ps-border));
   }
 
-  .pronoun-badge-pill[data-highlighted]:not([data-selected]) {
-    background-color: var(--ps-secondary-hover);
+  .pronoun-badge-pill[data-state="checked"] {
+    padding-left: 8px;
+    background-color: var(--ps-tint-1);
+    border-color: var(--ps-tint-border);
+    color: var(--ps-text);
   }
 
-  .pronoun-badge-pill--custom {
+  .pronoun-badge-pill[data-highlighted][data-state="checked"] {
+    background-color: var(--ps-tint-2);
+  }
+
+  .pronoun-badge-pill--custom,
+  .pronoun-badge-pill--custom[data-highlighted]:not([data-state="checked"]) {
     background-color: transparent;
-    border-color: var(--ps-primary);
+    border-color: color-mix(in srgb, var(--ps-primary) 55%, var(--ps-bg));
     border-style: dashed;
     color: var(--ps-primary);
   }
 
+  .pronoun-badge-pill--custom[data-highlighted] {
+    background-color: var(--ps-tint-1);
+  }
+
   .pronoun-badge-check {
-    font-size: 0.7rem;
+    display: flex;
+    color: var(--ps-primary);
   }
 
   /* ── Editor overlay ───────────────────────────────────────────── */
 
-  .pronoun-create-custom {
+  .pronoun-create-custom,
+  .pronoun-create-custom-icon {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
     color: var(--ps-primary);
     font-weight: 500;
   }

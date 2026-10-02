@@ -207,7 +207,7 @@ export interface PronounTheme {
  * Default theme
  */
 export const defaultTheme: PronounTheme = {
-  borderRadius: "4px",
+  borderRadius: "8px",
   colors: {
     background: "#ffffff",
     border: "#e2e8f0",
@@ -238,7 +238,7 @@ export const darkTheme: PronounTheme = {
   badgeStyle: {
     borderRadius: "9999px",
   },
-  borderRadius: "4px",
+  borderRadius: "8px",
   colors: {
     background: "#1a202c",
     badgeBackground: "#2d3748",

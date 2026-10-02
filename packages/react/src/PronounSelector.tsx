@@ -43,6 +43,22 @@ import type {
 
 const CREATE_SENTINEL_VALUE = "__create-custom__";
 
+const CheckIcon = (
+  <svg
+    aria-hidden="true"
+    fill="none"
+    height="14"
+    stroke="currentColor"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    strokeWidth="2"
+    viewBox="0 0 14 14"
+    width="14"
+  >
+    <path d="M3 7.5 5.75 10.25 11 4" />
+  </svg>
+);
+
 export const PronounSelector: React.FC<PronounSelectorProps> = ({
   "aria-label": ariaLabel = "Pronoun selector",
   className,
@@ -407,40 +423,43 @@ export const PronounSelector: React.FC<PronounSelectorProps> = ({
           onOpenChange={handleOpenChange}
           onValueChange={handleValueChange}
           open={editingPronounSet ? true : isMenuOpen}
+          positioning={{ gutter: 6, sameWidth: true }}
           value={selectedValues}
         >
           <Combobox.Control
             aria-label={ariaLabel}
             className={clsx("pronoun-select__control", classNames?.control)}
           >
-            <SortableContext
-              items={selectedOptions.map((opt) => opt.id ?? "")}
-              strategy={horizontalListSortingStrategy}
-            >
-              {selectedOptions.map((opt) => (
-                <SortableMultiValue
-                  key={opt.id}
-                  classNames={classNames?.sortableValue}
-                  icons={resolvedIcons}
-                  id={opt.id ?? opt.label}
-                  onEdit={handleEditPronounSet}
-                  onRemove={(removeId) => {
-                    const idx = selectedOptions.findIndex((o) => o.id === removeId);
-                    if (idx !== -1) onChange(value.filter((_, i) => i !== idx));
-                  }}
-                  option={opt}
-                  tagClassNames={classNames?.tag}
-                />
-              ))}
-            </SortableContext>
+            <div className="pronoun-select__values">
+              <SortableContext
+                items={selectedOptions.map((opt) => opt.id ?? "")}
+                strategy={horizontalListSortingStrategy}
+              >
+                {selectedOptions.map((opt) => (
+                  <SortableMultiValue
+                    key={opt.id}
+                    classNames={classNames?.sortableValue}
+                    icons={resolvedIcons}
+                    id={opt.id ?? opt.label}
+                    onEdit={handleEditPronounSet}
+                    onRemove={(removeId) => {
+                      const idx = selectedOptions.findIndex((o) => o.id === removeId);
+                      if (idx !== -1) onChange(value.filter((_, i) => i !== idx));
+                    }}
+                    option={opt}
+                    tagClassNames={classNames?.tag}
+                  />
+                ))}
+              </SortableContext>
 
-            <Combobox.Input
-              aria-describedby="pronoun-selector-description"
-              className={clsx("pronoun-select__input", classNames?.input)}
-              disabled={!!editingPronounSet}
-              name={name}
-              placeholder={selectedOptions.length === 0 ? placeholder : undefined}
-            />
+              <Combobox.Input
+                aria-describedby="pronoun-selector-description"
+                className={clsx("pronoun-select__input", classNames?.input)}
+                disabled={!!editingPronounSet}
+                name={name}
+                placeholder={selectedOptions.length === 0 ? placeholder : undefined}
+              />
+            </div>
 
             <Combobox.Trigger
               aria-label="Toggle pronoun options"
@@ -495,7 +514,7 @@ export const PronounSelector: React.FC<PronounSelectorProps> = ({
                               classNames?.badgeCheckIcon,
                             )}
                           >
-                            ✓
+                            {CheckIcon}
                           </span>
                         </Combobox.ItemIndicator>
                         <Combobox.ItemText>
@@ -534,9 +553,14 @@ export const PronounSelector: React.FC<PronounSelectorProps> = ({
                   {displayGroups.map((group) => (
                     <Combobox.ItemGroup
                       key={group.label || "all"}
+                      className={clsx(
+                        "pronoun-select__group",
+                        group.options.every((o) => o.isCreate) &&
+                          "pronoun-select__group--create",
+                      )}
                       id={group.label || "all"}
                     >
-                      {group.label && (
+                      {group.label && !group.options.every((o) => o.isCreate) && (
                         <Combobox.ItemGroupLabel
                           className={clsx(
                             "pronoun-group-label",
@@ -584,7 +608,7 @@ export const PronounSelector: React.FC<PronounSelectorProps> = ({
                             <Combobox.ItemIndicator
                               className="pronoun-select__item-indicator"
                             >
-                              ✓
+                              {CheckIcon}
                             </Combobox.ItemIndicator>
                           )}
                         </Combobox.Item>
