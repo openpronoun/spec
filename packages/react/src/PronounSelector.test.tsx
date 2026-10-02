@@ -9,6 +9,7 @@ import React, { useState } from "react";
 import { describe, expect, test } from "vitest";
 
 import { PronounSelector } from "./PronounSelector";
+import { getPronounSelectorStyles } from "./styles";
 import { darkTheme } from "./theme";
 import type { PronounTheme } from "./theme";
 
@@ -31,6 +32,27 @@ const TestWrapper = ({
 };
 
 describe("PronounSelector", () => {
+  test.each(["badges", "compact", "expanded"] as const)(
+    "closed menu is hidden in %s mode",
+    (dropdownMode) => {
+      const { container } = render(
+        <PronounSelector dropdownMode={dropdownMode} onChange={() => {}} value={[]} />,
+      );
+
+      const menu = container.querySelector<HTMLElement>(".pronoun-select__menu");
+      expect(menu).not.toBeNull();
+      expect(menu!.hidden).toBe(true);
+    },
+  );
+
+  test("stylesheet keeps the closed menu hidden over mode display rules", () => {
+    // Badge mode sets `display: flex` on the menu, which would override the
+    // browser's [hidden] rule and leave the closed menu on screen. jsdom
+    // doesn't model that cascade, so assert the guarding rule exists.
+    const css = getPronounSelectorStyles().replace(/\s+/g, " ");
+    expect(css).toMatch(/\.pronoun-select__menu\[hidden\] \{ display: none;? \}/);
+  });
+
   test("renders with empty value", () => {
     render(<TestWrapper />);
 

@@ -216,6 +216,12 @@ export const getPronounSelectorStyles = (_theme?: PronounTheme) => `
     animation: ps-menu-in 0.14s ease-out;
   }
 
+  /* Ark marks the closed menu [hidden]. Mode rules such as badge mode's
+     display: flex would otherwise override that and keep it on screen. */
+  .pronoun-select__menu[hidden] {
+    display: none;
+  }
+
   @keyframes ps-menu-in {
     from { opacity: 0; transform: translateY(-4px); }
     to   { opacity: 1; transform: translateY(0); }
