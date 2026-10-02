@@ -43,5 +43,8 @@
     "typescript": "latest",
     "typescript-eslint": "^8.62.0",
     "vitest": "latest"
+  },
+  "dependencies": {
+    "@astrojs/markdown-remark": "^7.3.1"
   }
 }
