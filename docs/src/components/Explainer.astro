@@ -1,0 +1,27 @@
+---
+/**
+ * One of the OpenPronoun explainer animations, framed by the logo stripe.
+ * Falls back to a still frame for people who prefer reduced motion.
+ * Sources live in docs/public/media/ (shared with the repo README).
+ */
+interface Props {
+	name: "parse" | "display";
+	alt: string;
+	caption?: string;
+	eager?: boolean;
+}
+const { name, alt, caption, eager = false } = Astro.props;
+const base = import.meta.env.BASE_URL.replace(/\/?$/, "/");
+const src = `${base}media/openpronoun-${name}.webp`;
+const still = `${base}media/openpronoun-${name}-still.webp`;
+---
+
+<figure class="op-figure not-content">
+	<div class="op-frame">
+		<picture>
+			<source srcset={still} media="(prefers-reduced-motion: reduce)" />
+			<img src={src} alt={alt} width="1200" height="675" loading={eager ? "eager" : "lazy"} decoding="async" />
+		</picture>
+	</div>
+	{caption && <figcaption>{caption}</figcaption>}
+</figure>

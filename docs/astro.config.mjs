@@ -15,21 +15,31 @@ const isCI = env.GITHUB_ACTIONS === "true";
 const SITE = isCI ? "https://openpronoun.github.io" : "http://localhost:4321";
 const BASE = isCI ? "/spec" : "/";
 
-// Rewrites root-relative href="/..." links in Markdown content to include the
-// Astro base path. Astro does not do this automatically for inline MD links.
+// Rewrites root-relative href="/..." links and src="/..." images in Markdown
+// content to include the Astro base path. Astro does not do this automatically
+// for inline MD links, or for images served from public/ (e.g. /media/...).
 function rehypeRebaseLinks() {
   if (BASE === "/") return () => {};
   const prefix = BASE.replace(/\/$/, "");
+  const rebase = (value) =>
+    typeof value === "string" &&
+    value.startsWith("/") &&
+    !value.startsWith("//") &&
+    !value.startsWith(`${prefix}/`)
+      ? prefix + value
+      : value;
   return (tree) => {
     visit(tree, "element", (node) => {
-      if (
-        node.tagName === "a" &&
-        typeof node.properties?.href === "string" &&
-        node.properties.href.startsWith("/") &&
-        !node.properties.href.startsWith("//")
-      ) {
-        node.properties.href = prefix + node.properties.href;
-      }
+      if (node.tagName === "a") node.properties.href = rebase(node.properties?.href);
+      if (node.tagName === "img") node.properties.src = rebase(node.properties?.src);
+      if (node.tagName === "source") node.properties.srcSet = rebase(node.properties?.srcSet);
+    });
+    // Raw HTML blocks in Markdown (e.g. <figure><picture>…) arrive unparsed.
+    visit(tree, "raw", (node) => {
+      node.value = node.value.replace(
+        /\b(src|srcset|href)="(\/(?!\/)[^"]*)"/g,
+        (_, attr, url) => `${attr}="${rebase(url)}"`,
+      );
     });
   };
 }
@@ -44,7 +54,32 @@ export default defineConfig({
   integrations: [
     starlight({
       title: "OpenPronoun",
-      customCss: ["./src/styles/custom.css"],
+      description:
+        "An open technical standard for modeling, parsing, storing, and displaying pronouns in software.",
+      logo: {
+        light: "./src/assets/wordmark-light.svg",
+        dark: "./src/assets/wordmark-dark.svg",
+        replacesTitle: true,
+      },
+      favicon: "/favicon.svg",
+      customCss: [
+        "@fontsource-variable/atkinson-hyperlegible-next",
+        "@fontsource-variable/atkinson-hyperlegible-mono",
+        "./src/styles/custom.css",
+      ],
+      components: {
+        Hero: "./src/components/Hero.astro",
+      },
+      expressiveCode: {
+        styleOverrides: {
+          borderRadius: "0.75rem",
+          codeFontFamily: "var(--sl-font-mono)",
+          uiFontFamily: "var(--sl-font)",
+        },
+      },
+      editLink: {
+        baseUrl: "https://github.com/openpronoun/spec/edit/main/docs/",
+      },
       social: [
         {
           icon: "github",

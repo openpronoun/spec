@@ -12,6 +12,16 @@ to the structured data model. **Parsing** interprets the user-provided text;
 The normative parsing requirements are listed under
 [Conformance](/specification/conformance/#parsing-requirements).
 
+<figure class="op-figure">
+<div class="op-frame">
+<picture>
+<source srcset="/media/openpronoun-parse-still.webp" media="(prefers-reduced-motion: reduce)" />
+<img src="/media/openpronoun-parse.webp" alt="Animation: the inputs 'They/Them', 'they / them / theirs' and 'them/they' drift into a pair of curly braces and come out as one structured set with five labelled forms: they, them, their, theirs, themselves." width="1200" height="675" loading="lazy" decoding="async" />
+</picture>
+</div>
+<figcaption>Three ways of typing the same pronouns normalize to one canonical set.</figcaption>
+</figure>
+
 ## Input expectations
 
 Pronoun inputs are usually shorthand. The parser should handle:

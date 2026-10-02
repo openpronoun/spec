@@ -1,0 +1,118 @@
+---
+/**
+ * Landing-page hero: the wordmark as the page title, a plain-language pitch,
+ * actions, and the parse explainer as the one moving thing on the page.
+ * Replaces Starlight's default Hero (see `components` in astro.config.mjs).
+ */
+import { Image } from "astro:assets";
+import { LinkButton } from "@astrojs/starlight/components";
+import Explainer from "./Explainer.astro";
+import wordmarkDark from "../assets/wordmark-dark.svg";
+import wordmarkLight from "../assets/wordmark-light.svg";
+
+const { data } = Astro.locals.starlightRoute.entry;
+const { tagline, actions = [] } = data.hero || {};
+---
+
+<div class="op-hero">
+	<div class="op-hero-copy">
+		<h1 id="_top" data-page-title>
+			<span class="sr-only">{data.title}</span>
+			<Image src={wordmarkDark} alt="" class="op-wordmark light:sl-hidden" loading="eager" />
+			<Image src={wordmarkLight} alt="" class="op-wordmark dark:sl-hidden" loading="eager" />
+		</h1>
+		<p class="op-lede">An open standard for getting pronouns right in software.</p>
+		{tagline && <p class="op-tagline" set:html={tagline} />}
+		<div class="op-actions">
+			{
+				actions.map(({ attrs: { class: className, ...attrs } = {}, icon, link: href, text, variant }) => (
+					<LinkButton {href} {variant} icon={icon?.name} class:list={[className]} {...attrs}>
+						{text}
+						{icon?.html && <Fragment set:html={icon.html} />}
+					</LinkButton>
+				))
+			}
+		</div>
+		<p class="op-status">
+			Draft 0.1, open for feedback. Reference libraries are MIT licensed.
+		</p>
+	</div>
+	<div class="op-hero-art">
+		<Explainer
+			name="parse"
+			eager
+			alt="Animation: the inputs 'They/Them', 'they / them / theirs' and 'them/they' drift into a pair of curly braces and come out as one structured set with five labelled forms: they, them, their, theirs, themselves."
+			caption="Three ways of typing the same pronouns, one canonical set."
+		/>
+	</div>
+</div>
+
+<style>
+	.op-hero {
+		display: grid;
+		gap: 2rem;
+		align-items: center;
+		padding-block: 1.5rem 2rem;
+	}
+
+	.op-hero-copy {
+		display: flex;
+		flex-direction: column;
+		gap: 1rem;
+		max-width: 34rem;
+	}
+
+	h1 {
+		margin: 0;
+		line-height: 1;
+	}
+
+	.op-wordmark {
+		width: min(100%, 22rem);
+		height: auto;
+	}
+
+	.op-lede {
+		margin: 0.5rem 0 0;
+		font-size: clamp(1.5rem, 1.1rem + 1.6vw, 2.15rem);
+		line-height: 1.2;
+		font-weight: 750;
+		letter-spacing: -0.015em;
+		color: var(--sl-color-white);
+		text-wrap: balance;
+	}
+
+	.op-tagline {
+		margin: 0;
+		font-size: var(--sl-text-lg);
+		line-height: 1.55;
+		color: var(--sl-color-gray-2);
+		text-wrap: pretty;
+	}
+
+	.op-actions {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.75rem 1.5rem;
+		align-items: center;
+		margin-top: 0.5rem;
+	}
+
+	.op-status {
+		margin: 0.25rem 0 0;
+		font-size: var(--sl-text-sm);
+		color: var(--sl-color-gray-3);
+	}
+
+	.op-hero-art :global(.op-figure) {
+		margin: 0;
+	}
+
+	@media (min-width: 64rem) {
+		.op-hero {
+			grid-template-columns: 5fr 6fr;
+			gap: 3rem;
+			padding-block: clamp(2rem, 6vmin, 4.5rem);
+		}
+	}
+</style>

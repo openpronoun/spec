@@ -1,8 +1,8 @@
 <div align="center">
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset=".github/assets/logo-dark.svg">
-  <img alt="OpenPronoun" src=".github/assets/logo-light.svg" width="364">
+  <source media="(prefers-color-scheme: dark)" srcset="docs/public/media/logo-dark.svg">
+  <img alt="OpenPronoun" src="docs/public/media/logo-light.svg" width="364">
 </picture>
 
 ### An open technical standard for getting pronouns right in software.
@@ -39,7 +39,7 @@ Getting this wrong isn't cosmetic. Misgendering erodes trust, and in settings li
 ### 1. Parse whatever people actually type
 
 <p align="center">
-  <img src=".github/assets/openpronoun-parse.webp" alt="Animation: the inputs 'They/Them', 'they / them / theirs' and 'them/they' drift into a pair of curly braces and come out as one structured set with five labelled forms — they (subjective), them (objective), their (possessive adjective), theirs (possessive pronoun), themselves (reflexive)." width="100%">
+  <img src="docs/public/media/openpronoun-parse.webp" alt="Animation: the inputs 'They/Them', 'they / them / theirs' and 'them/they' drift into a pair of curly braces and come out as one structured set with five labelled forms — they (subjective), them (objective), their (possessive adjective), theirs (possessive pronoun), themselves (reflexive)." width="100%">
 </p>
 
 Different spellings, spacing, capitalization, and word order all normalize to one canonical **pronoun set** with every grammatical form filled in. Multiple sets (`she/her, they/them`), neopronouns (`xe/xem`, `fae/faer`), and preferences like _any pronouns_, _no pronouns — use my name_, or _ask me_ are first-class, not edge cases. → [Parsing & normalization](https://openpronoun.github.io/spec/specification/parsing/)
@@ -47,7 +47,7 @@ Different spellings, spacing, capitalization, and word order all normalize to on
 ### 2. Store once, display everywhere
 
 <p align="center">
-  <img src=".github/assets/openpronoun-display.webp" alt="Animation: a structured record in curly braces sends data along dotted lines to three surfaces — a profile card showing 'They/Them, She/Her', a generated sentence reading 'They shared their notes.', and a public view showing only 'They/Them'." width="100%">
+  <img src="docs/public/media/openpronoun-display.webp" alt="Animation: a structured record in curly braces sends data along dotted lines to three surfaces — a profile card showing 'They/Them, She/Her', a generated sentence reading 'They shared their notes.', and a public view showing only 'They/Them'." width="100%">
 </p>
 
 Because every form is stored, any part of your product can render pronouns consistently: a short label beside a name, a grammatically correct generated sentence, or a public view that hides sets the person only shares with some audiences. → [Display & stringification](https://openpronoun.github.io/spec/specification/display/)
@@ -130,6 +130,8 @@ OpenPronoun is a draft, and it gets better with more voices. Contributions are w
 - **Your pronouns didn't parse the way they should?** That's a gap in the lexicon, not a problem with you. [Open an issue](https://github.com/openpronoun/spec/issues/new) with what you typed and what you expected.
 - **Spec feedback** — ambiguities, missing cases, internationalization — is welcome as issues or pull requests against the [docs](./docs/src/content/docs).
 - **Code changes** to published packages need a [Changeset](https://github.com/changesets/changesets) (`npm run changeset`).
+
+The [contributing guide](https://openpronoun.github.io/spec/project/contributing/) has the details.
 
 <details>
 <summary><strong>Development setup</strong></summary>

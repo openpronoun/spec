@@ -12,6 +12,16 @@ consistent, human-readable string.
 The normative display requirements are listed under
 [Conformance](/specification/conformance/#display-requirements).
 
+<figure class="op-figure">
+<div class="op-frame">
+<picture>
+<source srcset="/media/openpronoun-display-still.webp" media="(prefers-reduced-motion: reduce)" />
+<img src="/media/openpronoun-display.webp" alt="Animation: a structured record in curly braces sends data to three surfaces: a profile card showing 'They/Them, She/Her', a generated sentence reading 'They shared their notes.', and a public view showing only 'They/Them'." width="1200" height="675" loading="lazy" decoding="async" />
+</picture>
+</div>
+<figcaption>One stored record feeds a profile label, a generated sentence, and a privacy-aware public view.</figcaption>
+</figure>
+
 ## Display contexts
 
 - **Short display (profile / UI).** Beside a name, show a short indicator —

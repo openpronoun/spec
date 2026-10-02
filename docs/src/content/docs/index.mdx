@@ -1,59 +1,171 @@
 ---
 title: OpenPronoun
-description: A public, implementation-agnostic technical standard for modeling, parsing, normalizing, and displaying personal pronouns in software.
+description: An open technical standard for modeling, parsing, storing, and displaying pronouns in software — so every person is addressed the way they asked.
 template: splash
 hero:
-  tagline: A specification for representing, exchanging, parsing, and displaying personal pronouns in software systems.
+  tagline: Model them, parse them, store them, and show them the way each person asked, consistently across every system that touches their name.
   actions:
-    - text: Read the Spec
+    - text: Read the spec
       link: ./introduction/overview/
       icon: right-arrow
-    - text: Usage Examples
+    - text: Try the library
       link: ./usage/
+      variant: secondary
+    - text: GitHub
+      link: https://github.com/openpronoun/spec
       variant: minimal
-      icon: rocket
+      icon: github
+      attrs:
+        rel: noopener
 ---
 
-A public, implementation-agnostic technical standard for modeling, parsing,
-normalizing, and displaying personal pronouns in software.
+import Explainer from "../../components/Explainer.astro";
 
-**Status:** Draft · **Version:** 0.1
+## Why a standard?
 
-The specification is published under a permissive license. The reference
-implementations (a TypeScript library and a React component library) are MIT
-licensed.
+Pronouns show up everywhere a person's name does: profiles, patient charts, HR
+systems, class rosters, chat apps, and the emails your product sends on
+someone's behalf. Today almost every team solves this from scratch, and the
+usual answers fall short.
 
-## What this standard covers
+- **Free-text fields** are flexible, but software can't use them. You can't
+  safely write "_They_ updated _their_ settings" from a string someone typed.
+- **Short dropdowns** leave people out. "He / She / They / Other" tells everyone
+  whose pronouns aren't listed that they're the exception.
+- **Nothing interoperates.** Pronouns entered in one system don't survive the
+  trip to the next.
 
-- A structured **[data model](/specification/data-model/)** for pronoun sets and
-  pronoun preferences.
-- **[Parsing and normalization rules](/specification/parsing/)** for turning
-  varied user input into that model.
-- **[Display and canonical stringification](/specification/display/)**
-  conventions.
-- **[UX and accessibility guidelines](/guidance/ux-accessibility/)** for
-  collecting and showing pronouns.
-- Considerations for **[internationalization](/guidance/internationalization/)**
-  and **extensibility**.
-- A **[conformance](/specification/conformance/)** definition using RFC 2119
-  keywords, backed by a published JSON Schema and a shared test suite.
+Getting this wrong isn't cosmetic. Misgendering erodes trust, and in settings
+like healthcare it can discourage people from seeking care at all. OpenPronoun
+gives teams a shared, well-tested answer so they don't have to invent one, and
+so the people using their software are addressed correctly everywhere.
 
-## How the spec is organized
+## How it works
 
-- **Introduction** — non-normative background and motivation.
-- **Specification** — the normative core: conformance, data model, parsing,
-  display.
-- **Guidance** — recommended practices: UX/accessibility, internationalization,
-  security/privacy.
-- **Project** — reference implementations, references, and changelog.
+<div class="op-steps">
+<div class="op-step">
 
-## Compliance badge
+### Parse what people actually type
 
-Organizations that conform to the standard may display a compliance badge (a la
-[Shields.io](https://shields.io)), e.g.
+Different spellings, spacing, capitalization, and word order all normalize to
+one canonical **pronoun set** with every grammatical form filled in. Multiple
+sets, neopronouns, and answers like _any pronouns_ or _ask me_ are part of the
+model, not edge cases. See [Parsing & normalization](/specification/parsing/).
+
+</div>
+<div class="op-step">
+
+### Store once, display everywhere
+
+Because every form is stored, any part of your product can show pronouns
+consistently: a short label beside a name, a grammatically correct generated
+sentence, or a public view that leaves out sets the person only shares with
+some people. See [Display & stringification](/specification/display/).
+
+</div>
+</div>
+
+<Explainer
+  name="display"
+  alt="Animation: a structured record in curly braces sends data along dotted lines to three surfaces: a profile card showing 'They/Them, She/Her', a generated sentence reading 'They shared their notes.', and a public view showing only 'They/Them'."
+  caption="One stored record feeds a profile label, a generated sentence, and a privacy-aware public view."
+/>
+
+## Quick start
+
+```sh
+npm install @openpronoun/core
+```
+
+```ts
+import { parse, format } from "@openpronoun/core";
+
+const pref = parse("they/them, she/her");
+// [{ subjective: "they", objective: "them", possessive_adjective: "their",
+//    possessive_pronoun: "theirs", reflexive: "themselves" },
+//  { subjective: "she", ... }]
+
+format(pref!); // "They/Them, She/Her"
+format(pref!, { form: "expanded" }); // "They/Them/Theirs, She/Her/Hers"
+
+parse("any pronouns"); // [{ type: "any" }]
+parse("no pronouns"); // [{ type: "none" }]  (use their name)
+parse("fae/faer"); // known neopronoun set, all five forms
+```
+
+The [usage guide](/usage/) covers validation and privacy filtering, with live
+examples for React, Vue, Svelte, Solid, Preact, Alpine, and vanilla JS.
+
+## Designed around the people being described
+
+The spec bakes in a few commitments, so every implementation inherits them.
+
+<div class="op-principles">
+
+- **No "Other" bucket.** Anything that doesn't match a known set is kept exactly
+  as the person wrote it, never rejected or mangled.
+- **More than one set is normal.** `she/they`, `he/they`, and ranked or unranked
+  combinations are part of the core model.
+- **Neopronouns are real pronouns.** `xe/xem`, `ze/zir`, `fae/faer`, and others
+  parse into full sets like any other.
+- **Different answers mean different things.** _Any pronouns_, _no pronouns (use
+  my name)_, _ask me_, and _prefer not to say_ are distinct, and none of them is
+  treated as a blank.
+- **"Not these" is respected.** A set someone has excluded is never shown or
+  used.
+- **Context and privacy travel with the data.** "he/him (at work)" keeps its
+  note, and a set shared only with some audiences stays out of public views.
+- **Asking is optional.** The [UX guidance](/guidance/ux-accessibility/) treats
+  pronoun fields as optional, explained, and under the person's control.
+
+</div>
+
+## What the standard covers
+
+| Area                                                                                                          | What it defines                                                                                                                                                                                    |
+| ------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [Data model](/specification/data-model/)                                                                      | `PronounSet` and `PronounPreference`: five English forms, multiple sets with optional ranking, `any` / `none` / `ask` / `unspecified`, custom entries, exclusions, context, privacy, and language. |
+| [Parsing](/specification/parsing/)                                                                            | Turning real-world input into the model: separators, scrambled order, concatenated sets, special phrases, and freeform capture.                                                                    |
+| [Display](/specification/display/)                                                                            | Canonical short and expanded strings, multiple sets, context, and capitalization.                                                                                                                  |
+| [Conformance](/specification/conformance/)                                                                    | Normative requirements in RFC 2119 language, a published JSON Schema, and shared test fixtures.                                                                                                    |
+| [UX & accessibility](/guidance/ux-accessibility/)                                                             | How to ask for pronouns respectfully and show them clearly.                                                                                                                                        |
+| [Internationalization](/guidance/internationalization/) and [security & privacy](/guidance/security-privacy/) | Language tagging, localization, and handling pronoun data with care.                                                                                                                               |
+
+The model lines up with emerging healthcare work such as HL7's Gender Harmony
+pronoun value sets, while staying general-purpose. The
+[overview](/introduction/overview/) and [motivation](/introduction/motivation/)
+cover the background.
+
+## Packages
+
+| Package                                                                              | What it's for                                                                                                    |
+| ------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------- |
+| [`@openpronoun/core`](https://www.npmjs.com/package/@openpronoun/core)               | Reference TypeScript implementation: `parse`, `format`, `validate`, `filterByAudience`, and the pronoun lexicon. |
+| [`@openpronoun/react`](https://www.npmjs.com/package/@openpronoun/react)             | React components and hooks for collecting and displaying pronouns per the spec.                                  |
+| [`@openpronoun/schema`](https://www.npmjs.com/package/@openpronoun/schema)           | Canonical JSON Schema for the data model.                                                                        |
+| [`@openpronoun/zod`](https://www.npmjs.com/package/@openpronoun/zod)                 | Zod schemas and inferred TypeScript types mirroring the JSON Schema.                                             |
+| [`@openpronoun/conformance`](https://www.npmjs.com/package/@openpronoun/conformance) | Language-agnostic parsing and formatting fixtures any implementation can test against.                           |
+
+Writing a port in another language? Validate against `@openpronoun/schema` and
+run the `@openpronoun/conformance` fixtures, and you're testing against the same
+expectations as the reference library. More in
+[Reference implementations](/project/reference-implementations/).
+
+## Show you conform
+
+Implementations that meet the [conformance requirements](/specification/conformance/)
+may display the badge:
+
+![Pronoun Standard Compliant](https://img.shields.io/badge/pronouns-standard%20compliant-blueviolet)
 
 ```md
 ![Pronoun Standard Compliant](https://img.shields.io/badge/pronouns-standard%20compliant-blueviolet)
 ```
 
-See [Conformance](/specification/conformance/) for what compliance requires.
+## Help shape it
+
+OpenPronoun is a draft, and it gets better with more voices: engineers,
+designers, linguists, clinicians, and anyone who has been misnamed by software.
+If your pronouns didn't parse the way they should, that's a gap in the lexicon,
+not a problem with you. [Contributing](/project/contributing/) explains how to
+report it, suggest spec changes, or send code.

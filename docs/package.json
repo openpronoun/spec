@@ -23,6 +23,8 @@
     "@astrojs/starlight": "latest",
     "@astrojs/svelte": "latest",
     "@astrojs/vue": "latest",
+    "@fontsource-variable/atkinson-hyperlegible-mono": "^5.3.0",
+    "@fontsource-variable/atkinson-hyperlegible-next": "^5.3.0",
     "@types/alpinejs": "latest",
     "@types/react": "latest",
     "@types/react-dom": "latest",
