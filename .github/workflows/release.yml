@@ -31,12 +31,16 @@ jobs:
       # Build only publishable packages (not docs).
       - run: npx turbo run build --filter './packages/*'
 
-      - uses: changesets/action@v1
+      # v2 is required with @changesets/cli v3: the CLI no longer prints
+      # "New tag:" lines, and v2 reads published packages from the
+      # CHANGESETS_OUTPUT file instead. Without it, publishing still
+      # succeeds but git tags and GitHub releases are silently skipped.
+      # github-token defaults to the built-in GITHUB_TOKEN.
+      - uses: changesets/action@v2
         with:
-          version: npm run version
-          publish: npm run release
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          version-script: npm run version
+          publish-script: npm run release
+        # env:
           # OIDC trusted publishing — no NPM_TOKEN needed.
           # Register each @openpronoun/* package as a trusted publisher
           # on npmjs.com pointing at this repo + this workflow before
