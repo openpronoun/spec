@@ -94,17 +94,25 @@ See the [Usage Examples](/usage/) page for code samples.
 
 ## `@openpronoun/react` — React component library
 
-A UI library (TypeScript, React):
+Drop-in components (TypeScript, React 18 and 19) built on `@openpronoun/core`:
 
-- `<PronounSelector>` — a form field encapsulating the UX best practices
-  (multi-select combo box, free-text via the parsing library, structured output).
+- `<PronounSelector>` — the pronoun field: a multi-select combo box with common
+  sets and neopronouns, custom entries, free text parsed by the core library,
+  and keyboard-accessible reordering.
 - `<PronounDisplay>` — renders a `PronounPreference` per the
-  [display rules](/specification/display/) with proper accessibility attributes,
-  optionally toggling short/long display.
+  [display rules](/specification/display/), as text or badges, in short, medium,
+  or long form. Hides excluded and privacy-limited sets by default.
+- `<PronounBadge>`, `<PronounForm>`, `<PronounDetailEditor>` — a single-entry
+  badge, a complete labelled form field, and a per-form editor.
+- `usePronounState`, `usePronounParser` — the same logic as hooks, for custom UI.
 
-Themeable to match different design systems, with sensible defaults and
-accessibility (ARIA labels, focus management). MIT licensed and open-source so the
-community can contribute additional pronoun options or framework support.
+Styling works in three layers: theme tokens merged over light or dark defaults,
+a `classNames` slot for each part of each component, and replaceable icons.
+See [Drop-in Components](/usage/components/) for examples.
+
+A Preact package is in development by a community contributor. Vue, Svelte,
+Solid, and a framework-free web component are open for contributors; see
+[Drop-in Components](/usage/components/#open-for-contributors) to claim one.
 
 ## `@openpronoun/zod` — TypeScript schemas
 

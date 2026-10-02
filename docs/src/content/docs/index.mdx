@@ -71,7 +71,49 @@ some people. See [Display & stringification](/specification/display/).
   caption="One stored record feeds a profile label, a generated sentence, and a privacy-aware public view."
 />
 
+## Drop-in components
+
+Don't want to build the UI yourself? Drop in a component, set it, and forget
+it. Each one looks good out of the box, takes on your product's look when you
+want it to, and follows this spec without you having to read it.
+
+```tsx
+import { useState } from "react";
+import { PronounDisplay, PronounSelector, type PronounEntry } from "@openpronoun/react";
+
+export function ProfilePronouns() {
+  const [pronouns, setPronouns] = useState<PronounEntry[]>([]);
+
+  return (
+    <>
+      <PronounSelector value={pronouns} onChange={setPronouns} />
+      <PronounDisplay pronouns={pronouns} />
+    </>
+  );
+}
+```
+
+<div class="op-principles">
+
+- **Looks right by default.** Light and dark themes, accessible names, visible
+  focus, and full keyboard support, including reordering sets.
+- **Restyles to match you.** Override theme tokens, attach your own class names
+  to each part, or swap the icons.
+- **Behaves to spec.** Built on `@openpronoun/core`, so custom sets, multiple
+  sets, exclusions, and privacy are handled for you.
+
+</div>
+
+React components are available now in `@openpronoun/react`. Preact is in
+development by a community contributor, and Vue, Svelte, Solid, and a
+framework-free web component are open for anyone who'd like to build them. The
+[components guide](/usage/components/) covers everything they do and how to
+restyle them.
+
 ## Quick start
+
+Working with the data directly, or in a framework without components yet?
+Start with `@openpronoun/core`.
 
 ```sh
 npm install @openpronoun/core
@@ -138,13 +180,13 @@ cover the background.
 
 ## Packages
 
-| Package                                                                              | What it's for                                                                                                    |
-| ------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------- |
-| [`@openpronoun/core`](https://www.npmjs.com/package/@openpronoun/core)               | Reference TypeScript implementation: `parse`, `format`, `validate`, `filterByAudience`, and the pronoun lexicon. |
-| [`@openpronoun/react`](https://www.npmjs.com/package/@openpronoun/react)             | React components and hooks for collecting and displaying pronouns per the spec.                                  |
-| [`@openpronoun/schema`](https://www.npmjs.com/package/@openpronoun/schema)           | Canonical JSON Schema for the data model.                                                                        |
-| [`@openpronoun/zod`](https://www.npmjs.com/package/@openpronoun/zod)                 | Zod schemas and inferred TypeScript types mirroring the JSON Schema.                                             |
-| [`@openpronoun/conformance`](https://www.npmjs.com/package/@openpronoun/conformance) | Language-agnostic parsing and formatting fixtures any implementation can test against.                           |
+| Package                                                                              | What it's for                                                                                                     |
+| ------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------- |
+| [`@openpronoun/core`](https://www.npmjs.com/package/@openpronoun/core)               | Reference TypeScript implementation: `parse`, `format`, `validate`, `filterByAudience`, and the pronoun lexicon.  |
+| [`@openpronoun/react`](https://www.npmjs.com/package/@openpronoun/react)             | Drop-in React components and hooks for collecting and displaying pronouns per the spec, themeable and restylable. |
+| [`@openpronoun/schema`](https://www.npmjs.com/package/@openpronoun/schema)           | Canonical JSON Schema for the data model.                                                                         |
+| [`@openpronoun/zod`](https://www.npmjs.com/package/@openpronoun/zod)                 | Zod schemas and inferred TypeScript types mirroring the JSON Schema.                                              |
+| [`@openpronoun/conformance`](https://www.npmjs.com/package/@openpronoun/conformance) | Language-agnostic parsing and formatting fixtures any implementation can test against.                            |
 
 Writing a port in another language? Validate against `@openpronoun/schema` and
 run the `@openpronoun/conformance` fixtures, and you're testing against the same

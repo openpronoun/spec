@@ -17,6 +17,7 @@ Model them, parse them, store them, and display them the way each person asked �
 **[Documentation](https://openpronoun.github.io/spec/)** ·
 **[Specification](https://openpronoun.github.io/spec/specification/conformance/)** ·
 **[Usage examples](https://openpronoun.github.io/spec/usage/)** ·
+**[Components](#drop-in-components)** ·
 **[Packages](#packages)** ·
 **[Contributing](#contributing)**
 
@@ -52,7 +53,57 @@ Different spellings, spacing, capitalization, and word order all normalize to on
 
 Because every form is stored, any part of your product can render pronouns consistently: a short label beside a name, a grammatically correct generated sentence, or a public view that hides sets the person only shares with some audiences. → [Display & stringification](https://openpronoun.github.io/spec/specification/display/)
 
+## Drop-in components
+
+Don't want to build the UI yourself? Drop in a component and move on. Each one is built to look good out of the box, take on your design system's look, and follow the spec without you having to read it.
+
+```tsx
+import { useState } from "react";
+import { PronounDisplay, PronounSelector, type PronounEntry } from "@openpronoun/react";
+
+export function ProfilePronouns() {
+  const [pronouns, setPronouns] = useState<PronounEntry[]>([]);
+
+  return (
+    <>
+      <PronounSelector value={pronouns} onChange={setPronouns} />
+      <PronounDisplay pronouns={pronouns} />
+    </>
+  );
+}
+```
+
+- **Looks right by default.** Light and dark themes ship in the box, with accessible labels, focus states, and full keyboard support, including drag-to-reorder.
+- **Restyles to match you.** Override any theme token (colors, radius, fonts, spacing), attach your own class names to each part of a component, or swap the icons.
+- **Behaves to spec.** Components run on [`@openpronoun/core`](./packages/core), so parsing and display follow the standard: common sets and neopronouns are offered up front, anyone can add a custom set in their own words, more than one set is supported, and excluded or privacy-limited sets never show up where they shouldn't.
+
+<!-- prettier-ignore -->
+```tsx
+import { defaultTheme } from "@openpronoun/react";
+
+<PronounSelector
+  value={pronouns}
+  onChange={setPronouns}
+  theme={{
+    colors: { ...defaultTheme.colors, primary: "#0b6e4f", focusRing: "#0b6e4f" },
+    borderRadius: "999px",
+    fontFamily: "inherit",
+  }}
+  classNames={{ root: "profile-field", menu: "profile-menu" }}
+/>
+```
+
+**Available now:** React, in [`@openpronoun/react`](./packages/react). `PronounSelector` for collecting pronouns, `PronounDisplay` and `PronounBadge` for showing them, `PronounForm` and `PronounDetailEditor` for full editing flows, and the `usePronounState` and `usePronounParser` hooks if you'd rather build your own.
+
+**In development:** Preact, being built by a community contributor.
+
+**Open for contributors:** Vue, Svelte, Solid, and a web component that works anywhere, including vanilla JS and Alpine. If you'd like to build one of these, [open an issue](https://github.com/openpronoun/spec/issues/new) to claim it and we'll help you get started. The React package, the shared theme tokens, and the [conformance fixtures](./packages/conformance) give you a clear target.
+
+In the meantime, every framework can use `@openpronoun/core` directly, as below. More in the [components guide](https://openpronoun.github.io/spec/usage/components/).
+
 ## Quick start
+
+Working with the data directly, or in a framework without components yet? Start with `@openpronoun/core`.
 
 ```sh
 npm install @openpronoun/core
@@ -103,13 +154,13 @@ The spec bakes in a few commitments, so every implementation inherits them:
 
 ## Packages
 
-| Package                                              | What it's for                                                                                                    |
-| ---------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
-| [`@openpronoun/core`](./packages/core)               | Reference TypeScript implementation: `parse`, `format`, `validate`, `filterByAudience`, and the pronoun lexicon. |
-| [`@openpronoun/react`](./packages/react)             | React components and hooks for collecting and displaying pronouns per the spec.                                  |
-| [`@openpronoun/schema`](./packages/schema)           | Canonical JSON Schema for the data model.                                                                        |
-| [`@openpronoun/zod`](./packages/zod)                 | Zod schemas and inferred TypeScript types mirroring the JSON Schema.                                             |
-| [`@openpronoun/conformance`](./packages/conformance) | Language-agnostic parsing and formatting fixtures any implementation can test against.                           |
+| Package                                              | What it's for                                                                                                     |
+| ---------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| [`@openpronoun/core`](./packages/core)               | Reference TypeScript implementation: `parse`, `format`, `validate`, `filterByAudience`, and the pronoun lexicon.  |
+| [`@openpronoun/react`](./packages/react)             | Drop-in React components and hooks for collecting and displaying pronouns per the spec, themeable and restylable. |
+| [`@openpronoun/schema`](./packages/schema)           | Canonical JSON Schema for the data model.                                                                         |
+| [`@openpronoun/zod`](./packages/zod)                 | Zod schemas and inferred TypeScript types mirroring the JSON Schema.                                              |
+| [`@openpronoun/conformance`](./packages/conformance) | Language-agnostic parsing and formatting fixtures any implementation can test against.                            |
 
 Writing a port in another language? Validate against [`@openpronoun/schema`](./packages/schema) and run the [`@openpronoun/conformance`](./packages/conformance) fixtures, and you're testing against the same expectations as the reference library.
 
