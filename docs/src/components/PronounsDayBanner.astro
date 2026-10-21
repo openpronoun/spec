@@ -1,0 +1,75 @@
+---
+/**
+ * Seasonal banner for International Pronouns Day, shown at the top of the
+ * landing page only. Overrides Starlight's `Banner` (see `components` in
+ * astro.config.mjs), so it also renders the built-in `banner` frontmatter
+ * field for any page that sets one.
+ *
+ * The day is the third Wednesday of October each year — not a fixed date:
+ * https://pronounsday.org/. The site is statically built, so the build can't
+ * know the visitor's date: the banner ships hidden and an inline script reveals
+ * it when today is the day. Inline (not bundled) so it runs during parsing,
+ * before the browser paints the content below it, which avoids a flash of
+ * banner on every other day of the year and a layout shift on the day itself.
+ */
+import DefaultBanner from "@astrojs/starlight/components/Banner.astro";
+
+// The landing page is the root slug; Starlight reports every other page by path.
+const { id } = Astro.locals.starlightRoute;
+const isLandingPage = id === "";
+---
+
+<DefaultBanner />
+
+{
+	isLandingPage && (
+		<div class="sl-banner op-pronouns-day" data-pagefind-ignore hidden>
+			<p>
+				<strong>International Pronouns Day</strong> — a day to make respecting,
+				sharing, and educating about personal pronouns commonplace.{" "}
+				<a href="https://pronounsday.org/" rel="noopener">
+					Learn more at pronounsday.org
+				</a>
+			</p>
+		</div>
+	)
+}
+
+{
+	isLandingPage && (
+		<script is:inline>
+			// Reveal the banner only on the third Wednesday of October (local time).
+			(() => {
+				const now = new Date();
+				if (now.getMonth() !== 9) return;
+				const first = new Date(now.getFullYear(), 9, 1);
+				const firstWednesday = 1 + ((3 - first.getDay() + 7) % 7);
+				if (now.getDate() !== firstWednesday + 14) return;
+				document.querySelector(".op-pronouns-day")?.removeAttribute("hidden");
+			})();
+		</script>
+	)
+}
+
+<style>
+	/* Overriding Starlight's Banner replaces its style block too, so the
+	   banner look is mirrored here. The `--sl-color-banner-*` overrides
+	   Starlight documents still work. */
+	.op-pronouns-day {
+		padding: var(--sl-nav-pad-y) var(--sl-nav-pad-x);
+		background-color: var(--sl-color-banner-bg, var(--sl-color-bg-accent));
+		color: var(--sl-color-banner-text, var(--sl-color-text-invert));
+		line-height: var(--sl-line-height-headings);
+		text-align: center;
+		text-wrap: balance;
+		box-shadow: var(--sl-shadow-sm);
+	}
+
+	.op-pronouns-day a {
+		color: inherit;
+	}
+
+	.op-pronouns-day p {
+		margin: 0;
+	}
+</style>

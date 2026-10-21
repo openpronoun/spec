@@ -69,6 +69,7 @@ export default defineConfig({
       ],
       components: {
         Hero: "./src/components/Hero.astro",
+        Banner: "./src/components/PronounsDayBanner.astro",
       },
       expressiveCode: {
         styleOverrides: {
